@@ -2236,64 +2236,61 @@ class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
             return
         }
 
-        if provider == "dropbox" {
-            DropboxUploader.shared.uploadImage(image, progress: { fraction in
-                toast.updateProgress(fraction)
-            }) { result in
-                switch result {
-                case .success(let link):
-                    let pasteboard = NSPasteboard.general
-                    pasteboard.clearContents()
-                    pasteboard.setString(link, forType: .string)
-                    toast.showSuccess(link: link, deleteURL: "")
-                case .failure(let error):
-                    toast.showError(message: error.localizedDescription)
+        // Auto-redact sensitive text and name the file from its own text
+        // before anything leaves the Mac (Settings → Uploads).
+        UploadPreparation.prepare(image) { prepared in
+            let image = prepared.image
+            if provider == "dropbox" {
+                DropboxUploader.shared.uploadImage(image, title: prepared.title, progress: { fraction in
+                    toast.updateProgress(fraction)
+                }) { result in
+                    switch result {
+                    case .success(let link):
+                        UploadLinkClipboard.copy(link)
+                        toast.showSuccess(link: link, deleteURL: "")
+                    case .failure(let error):
+                        toast.showError(message: error.localizedDescription)
+                    }
                 }
-            }
-        } else if provider == "gdrive" {
-            GoogleDriveUploader.shared.uploadImage(image) { result in
-                switch result {
-                case .success(let link):
-                    let pasteboard = NSPasteboard.general
-                    pasteboard.clearContents()
-                    pasteboard.setString(link, forType: .string)
-                    toast.showSuccess(link: link, deleteURL: "")
-                case .failure(let error):
-                    toast.showError(message: error.localizedDescription)
+            } else if provider == "gdrive" {
+                GoogleDriveUploader.shared.uploadImage(image) { result in
+                    switch result {
+                    case .success(let link):
+                        UploadLinkClipboard.copy(link)
+                        toast.showSuccess(link: link, deleteURL: "")
+                    case .failure(let error):
+                        toast.showError(message: error.localizedDescription)
+                    }
                 }
-            }
-        } else if provider == "s3" {
-            S3Uploader.shared.uploadImage(image, progress: { fraction in
-                toast.updateProgress(fraction)
-            }) { result in
-                switch result {
-                case .success(let link):
-                    let pasteboard = NSPasteboard.general
-                    pasteboard.clearContents()
-                    pasteboard.setString(link, forType: .string)
-                    toast.showSuccess(link: link, deleteURL: "")
-                case .failure(let error):
-                    toast.showError(message: error.localizedDescription)
+            } else if provider == "s3" {
+                S3Uploader.shared.uploadImage(image, progress: { fraction in
+                    toast.updateProgress(fraction)
+                }) { result in
+                    switch result {
+                    case .success(let link):
+                        UploadLinkClipboard.copy(link)
+                        toast.showSuccess(link: link, deleteURL: "")
+                    case .failure(let error):
+                        toast.showError(message: error.localizedDescription)
+                    }
                 }
-            }
-        } else {
-            ImageUploader.upload(image: image) { result in
-                switch result {
-                case .success(let uploadResult):
-                    let pasteboard = NSPasteboard.general
-                    pasteboard.clearContents()
-                    pasteboard.setString(uploadResult.link, forType: .string)
+            } else {
+                ImageUploader.upload(image: image) { result in
+                    switch result {
+                    case .success(let uploadResult):
+                        UploadLinkClipboard.copy(uploadResult.link)
 
-                    var uploads = UserDefaults.standard.array(forKey: "imgbbUploads") as? [[String: String]] ?? []
-                    uploads.append([
-                        "deleteURL": uploadResult.deleteURL,
-                        "link": uploadResult.link,
-                    ])
-                    UserDefaults.standard.set(uploads, forKey: "imgbbUploads")
+                        var uploads = UserDefaults.standard.array(forKey: "imgbbUploads") as? [[String: String]] ?? []
+                        uploads.append([
+                            "deleteURL": uploadResult.deleteURL,
+                            "link": uploadResult.link,
+                        ])
+                        UserDefaults.standard.set(uploads, forKey: "imgbbUploads")
 
-                    toast.showSuccess(link: uploadResult.link, deleteURL: uploadResult.deleteURL)
-                case .failure(let error):
-                    toast.showError(message: error.localizedDescription)
+                        toast.showSuccess(link: uploadResult.link, deleteURL: uploadResult.deleteURL)
+                    case .failure(let error):
+                        toast.showError(message: error.localizedDescription)
+                    }
                 }
             }
         }

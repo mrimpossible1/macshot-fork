@@ -294,12 +294,15 @@ final class DropboxUploader: NSObject, ASWebAuthenticationPresentationContextPro
         }, completion: completion)
     }
 
-    func uploadImage(_ image: NSImage, progress: (@MainActor @Sendable (Double) -> Void)? = nil,
+    /// `title` is a readable name from the screenshot's text (see
+    /// `UploadPreparation`); without one the filename template is used.
+    func uploadImage(_ image: NSImage, title: String? = nil, progress: (@MainActor @Sendable (Double) -> Void)? = nil,
                      completion: @escaping (Result<String, Error>) -> Void) {
         do {
             let pixels = try HistoryImageSnapshot.Image(image)
             let template = defaults.string(forKey: FilenameFormatter.userDefaultsKey) ?? FilenameFormatter.defaultTemplate
-            let name = FilenameFormatter.format(template: template) + ".png"
+            let base = title.map { ReadableCaptureName.filename(title: $0, date: Date()) } ?? FilenameFormatter.format(template: template)
+            let name = base + ".png"
             upload(payload: .image(pixels), filename: name, progress: progress, completion: completion)
         } catch { completion(.failure(error)) }
     }

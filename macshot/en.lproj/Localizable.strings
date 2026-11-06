@@ -350,6 +350,13 @@
 "S3-Compatible (images + videos)" = "S3-Compatible (images + videos)";
 "Dropbox (images + videos)" = "Dropbox (images + videos)";
 "Enter uploads the capture and copies the link" = "Enter uploads the capture and copies the link";
+"Hide emails, phone numbers and keys before uploading" = "Hide emails, phone numbers and keys before uploading";
+"Name Dropbox files from their text" = "Name Dropbox files from their text";
+"Both run on this Mac before the upload. Hidden text is covered with solid boxes, using the types picked in the capture toolbar's Auto-Redact menu (emails, phone numbers, cards and keys by default). Your local copy is not changed." = "Both run on this Mac before the upload. Hidden text is covered with solid boxes, using the types picked in the capture toolbar's Auto-Redact menu (emails, phone numbers, cards and keys by default). Your local copy is not changed.";
+"Copy link as:" = "Copy link as:";
+"Plain URL" = "Plain URL";
+"Markdown link" = "Markdown link";
+"Rich link (pastes as the file name)" = "Rich link (pastes as the file name)";
 "S3-Compatible Storage" = "S3-Compatible Storage";
 "Sign In with Google" = "Sign In with Google";
 "Sign Out" = "Sign Out";

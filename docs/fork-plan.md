@@ -12,6 +12,9 @@ This fork adds one thing on top of upstream macshot: every capture can land in a
 - **English only**: the 40 other language folders are removed and the language picker offers only English.
 - **No built-in updater**: Sparkle never starts and "Check for Updates..." is gone, so an update can't replace this fork with official macshot. A monthly scheduled Claude task (1st of each month) reviews upstream and opens an `upstream-sync-YYYY-MM` pull request with a plain-language summary of what's worth taking.
 - **Video look presets** (video editor → Background panel → Presets): save the whole look (background, frame, pointer, zoom, keystrokes, camera, captions) under a name, apply it to any recording, delete it. Screen Studio has these; upstream only remembers the last look.
+- **Auto-redact before upload** (Settings → Uploads, on by default): one on-device OCR pass covers emails, phone numbers, card numbers, keys and tokens with solid boxes before a screenshot leaves the Mac. Your local copy keeps the original. Neither CleanShot nor Screen Studio does this.
+- **Readable file names** (Dropbox, on by default): files are named from the screenshot's most prominent text, e.g. `Payout settings 2026-11-06 at 01.51.07.png`, so `/Share` and the link itself read like what they show. Lines that were redacted are never used as names.
+- **Copy link as** (Settings → Uploads): plain URL, Markdown link `[Payout settings](https://…)`, or rich link that pastes into Slack, Notion, Google Docs or Mail as the clickable file name.
 - **Auto Zoom new recordings** (Zoom panel, on by default): a fresh recording opens with zooms already placed from your clicks and typing, like Screen Studio. Turn it off to start with no zooms.
 
 ## Before daily use (do these once)

@@ -1975,6 +1975,30 @@ class SettingsWindowController: NSWindowController, NSToolbarDelegate, NSWindowD
         let enterUploadsCheckbox = NSButton(checkboxWithTitle: L("Enter uploads the capture and copies the link"), target: self, action: #selector(quickCaptureUploadsChanged(_:)))
         enterUploadsCheckbox.state = UserDefaults.standard.bool(forKey: "quickCaptureUploads") ? .on : .off
         stack.addArrangedSubview(indented(enterUploadsCheckbox))
+        stack.setCustomSpacing(6, after: stack.arrangedSubviews.last!)
+
+        let redactCheckbox = NSButton(checkboxWithTitle: L("Hide emails, phone numbers and keys before uploading"), target: self, action: #selector(uploadAutoRedactChanged(_:)))
+        redactCheckbox.state = UploadPreparation.autoRedact ? .on : .off
+        stack.addArrangedSubview(indented(redactCheckbox))
+        stack.setCustomSpacing(6, after: stack.arrangedSubviews.last!)
+
+        let namesCheckbox = NSButton(checkboxWithTitle: L("Name Dropbox files from their text"), target: self, action: #selector(uploadReadableNamesChanged(_:)))
+        namesCheckbox.state = UploadPreparation.readableNames ? .on : .off
+        stack.addArrangedSubview(indented(namesCheckbox))
+        stack.setCustomSpacing(4, after: stack.arrangedSubviews.last!)
+
+        let prepNote = NSTextField(wrappingLabelWithString: L("Both run on this Mac before the upload. Hidden text is covered with solid boxes, using the types picked in the capture toolbar's Auto-Redact menu (emails, phone numbers, cards and keys by default). Your local copy is not changed."))
+        prepNote.font = NSFont.systemFont(ofSize: 10)
+        prepNote.textColor = .secondaryLabelColor
+        stack.addArrangedSubview(indented(prepNote))
+        stack.setCustomSpacing(10, after: stack.arrangedSubviews.last!)
+
+        let linkFormatPopup = NSPopUpButton()
+        linkFormatPopup.addItems(withTitles: [L("Plain URL"), L("Markdown link"), L("Rich link (pastes as the file name)")])
+        linkFormatPopup.selectItem(at: UploadLinkClipboard.Format.allCases.firstIndex(of: UploadLinkClipboard.format) ?? 0)
+        linkFormatPopup.target = self
+        linkFormatPopup.action = #selector(uploadLinkFormatChanged(_:))
+        stack.addArrangedSubview(labeledRow(L("Copy link as:"), controls: [linkFormatPopup]))
         stack.setCustomSpacing(16, after: stack.arrangedSubviews.last!)
 
         // ── Dropbox ──
@@ -2419,6 +2443,21 @@ class SettingsWindowController: NSWindowController, NSToolbarDelegate, NSWindowD
         default: audience = .publicLink
         }
         UserDefaults.standard.set(audience.rawValue, forKey: "dropboxLinkAudience")
+    }
+
+    @objc private func uploadAutoRedactChanged(_ sender: NSButton) {
+        UserDefaults.standard.set(sender.state == .on, forKey: UploadPreparation.autoRedactKey)
+    }
+
+    @objc private func uploadReadableNamesChanged(_ sender: NSButton) {
+        UserDefaults.standard.set(sender.state == .on, forKey: UploadPreparation.readableNamesKey)
+    }
+
+    @objc private func uploadLinkFormatChanged(_ sender: NSPopUpButton) {
+        let formats = UploadLinkClipboard.Format.allCases
+        let index = sender.indexOfSelectedItem
+        guard index >= 0, index < formats.count else { return }
+        UserDefaults.standard.set(formats[index].rawValue, forKey: UploadLinkClipboard.defaultsKey)
     }
 
     @objc private func quickCaptureUploadsChanged(_ sender: NSButton) {

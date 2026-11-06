@@ -270,8 +270,7 @@ extension VideoEditorWindowController {
         let finish: (Result<String, Error>) -> Void = { [weak self] result in
             switch result {
             case .success(let link):
-                NSPasteboard.general.clearContents()
-                NSPasteboard.general.setString(link, forType: .string)
+                UploadLinkClipboard.copy(link)
                 self?.showStatus(L("Uploaded! Link copied."))
             case .failure(let error):
                 self?.showStatus(String(format: L("Upload failed: %@"), error.localizedDescription), isError: true)
