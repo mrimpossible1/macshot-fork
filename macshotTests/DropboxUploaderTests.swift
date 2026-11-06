@@ -211,6 +211,87 @@ final class DropboxUploaderTests: XCTestCase {
         await MediaExportCoordinator.shared.waitUntilIdle()
     }
 
+    // MARK: - Monthly archive
+
+    private var utc: Calendar {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: "UTC")!
+        return calendar
+    }
+
+    private var novemberSixth: Date { DropboxUploader.dropboxDate("2026-11-06T17:00:00Z")! }
+
+    func testArchiveMovesOnlyEarlierMonthFilesAtTheTop() {
+        let entries: [[String: Any]] = [
+            [".tag": "file", "name": "Old.png", "path_display": "/Share/Old.png", "client_modified": "2026-10-31T23:59:00Z"],
+            [".tag": "file", "name": "New.png", "path_display": "/Share/New.png", "client_modified": "2026-11-01T00:00:00Z"],
+            [".tag": "folder", "name": "Archive", "path_display": "/Share/Archive"],
+            [".tag": "file", "name": "Deep.png", "path_display": "/Share/Clients/Deep.png", "client_modified": "2026-01-01T00:00:00Z"],
+            [".tag": "file", "name": "NoDate.png", "path_display": "/Share/NoDate.png", "server_modified": "2025-12-24T10:00:00Z"],
+        ]
+        let moves = DropboxUploader.archiveMoves(entries: entries, folder: "/Share", now: novemberSixth, calendar: utc)
+        XCTAssertEqual(moves.map(\.from), ["/Share/Old.png", "/Share/NoDate.png"])
+        XCTAssertEqual(moves.map(\.to), ["/Share/Archive/2026-10/Old.png", "/Share/Archive/2025-12/NoDate.png"])
+    }
+
+    func testArchiveRunsOncePerMonthAndRecordsIt() async throws {
+        let uploader = try dropbox()
+        let moved = NSMutableArray()
+        respond { request, body in
+            let sent = try JSONSerialization.jsonObject(with: body) as? [String: Any]
+            switch request.url?.path {
+            case "/2/files/list_folder":
+                XCTAssertEqual(sent?["path"] as? String, "/Share")
+                XCTAssertEqual(sent?["recursive"] as? Bool, false)
+                return .init(status: 200, body: Self.json(["has_more": false, "cursor": "c", "entries": [
+                    [".tag": "file", "name": "Old.png", "path_display": "/Share/Old.png", "client_modified": "2026-10-02T09:00:00Z"],
+                    [".tag": "file", "name": "Now.png", "path_display": "/Share/Now.png", "client_modified": "2026-11-05T09:00:00Z"],
+                ]]))
+            case "/2/files/move_v2":
+                moved.add("\(sent?["from_path"] as? String ?? "")>\(sent?["to_path"] as? String ?? "")")
+                XCTAssertEqual(sent?["autorename"] as? Bool, true)
+                return .init(status: 200, body: Self.json(["metadata": ["name": "Old.png"]]))
+            default:
+                XCTFail("unexpected request \(request.url?.absoluteString ?? "")")
+                return .init(status: 500, body: Data())
+            }
+        }
+        let count = try await withCheckedThrowingContinuation { continuation in
+            uploader.archiveIfDue(now: novemberSixth, calendar: utc) { continuation.resume(with: $0) }
+        }
+        XCTAssertEqual(count, 1)
+        XCTAssertEqual(moved as? [String], ["/Share/Old.png>/Share/Archive/2026-10/Old.png"])
+        XCTAssertEqual(defaults.string(forKey: DropboxUploader.lastArchiveMonthKey), "2026-11")
+
+        // Same month again: no requests at all.
+        respond { request, _ in
+            XCTFail("archive ran twice in one month: \(request.url?.path ?? "")")
+            return .init(status: 500, body: Data())
+        }
+        let again = try await withCheckedThrowingContinuation { continuation in
+            uploader.archiveIfDue(now: novemberSixth, calendar: utc) { continuation.resume(with: $0) }
+        }
+        XCTAssertEqual(again, 0)
+    }
+
+    func testFailedArchiveIsRetriedLater() async throws {
+        let uploader = try dropbox()
+        respond { request, _ in
+            if request.url?.path == "/2/files/list_folder" {
+                return .init(status: 200, body: Self.json(["has_more": false, "entries": [
+                    [".tag": "file", "name": "Old.png", "path_display": "/Share/Old.png", "client_modified": "2026-10-02T09:00:00Z"]]]))
+            }
+            return .init(status: 409, body: Self.json(["error_summary": "to/insufficient_space/"]))
+        }
+        do {
+            _ = try await withCheckedThrowingContinuation { continuation in
+                uploader.archiveIfDue(now: novemberSixth, calendar: utc) { continuation.resume(with: $0) }
+            }
+            XCTFail("archive should report the failed move")
+        } catch {}
+        XCTAssertNil(defaults.string(forKey: DropboxUploader.lastArchiveMonthKey))
+    }
+
     func testHTTPErrorSurfacesDropboxSummary() async throws {
         let uploader = try dropbox()
         respond { _, _ in .init(status: 409, body: Self.json(["error_summary": "path/insufficient_space/"])) }

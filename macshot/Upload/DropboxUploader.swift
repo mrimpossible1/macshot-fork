@@ -40,6 +40,8 @@ final class DropboxUploader: NSObject, ASWebAuthenticationPresentationContextPro
     private var tokenRefresh: (id: UUID, task: Task<String, Error>)?
     private var authSession: ASWebAuthenticationSession?
     private weak var presentationWindow: NSWindow?
+    private var archiveRunning = false
+    private var archiveTimer: Timer?
 
     init(session: URLSession? = nil, tokenFileURL: URL? = nil,
          defaults: UserDefaults = .standard, retryDelayNanoseconds: UInt64 = 2_000_000_000) {
@@ -627,6 +629,126 @@ final class DropboxUploader: NSObject, ASWebAuthenticationPresentationContextPro
 
     nonisolated static func error(_ msg: String) -> NSError {
         NSError(domain: "DropboxUploader", code: 1, userInfo: [NSLocalizedDescriptionKey: msg])
+    }
+}
+
+// MARK: - Monthly archive
+
+/// Once a month, files left in the top of the share folder from earlier
+/// months move into `<folder>/Archive/YYYY-MM`, by the month they were
+/// uploaded (which is when they were taken). Nothing is deleted; folders and
+/// anything already in a subfolder are left alone. Moved files keep their
+/// Dropbox links.
+extension DropboxUploader {
+    nonisolated static let monthlyArchiveKey = "dropboxMonthlyArchive"
+    nonisolated static let lastArchiveMonthKey = "dropboxLastArchiveMonth"
+
+    var monthlyArchive: Bool { defaults.object(forKey: Self.monthlyArchiveKey) as? Bool ?? true }
+
+    nonisolated static func monthKey(_ date: Date, calendar: Calendar) -> String {
+        let parts = calendar.dateComponents([.year, .month], from: date)
+        return String(format: "%04d-%02d", parts.year ?? 0, parts.month ?? 0)
+    }
+
+    nonisolated static func dropboxDate(_ value: Any?) -> Date? {
+        guard let text = value as? String else { return nil }
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime]
+        return formatter.date(from: text)
+    }
+
+    /// Which `list_folder` entries to move, and where.
+    nonisolated static func archiveMoves(entries: [[String: Any]], folder: String, now: Date,
+                                         calendar: Calendar) -> [(from: String, to: String)] {
+        let current = monthKey(now, calendar: calendar)
+        return entries.compactMap { entry -> (from: String, to: String)? in
+            guard entry[".tag"] as? String == "file",
+                  let path = entry["path_display"] as? String,
+                  let name = entry["name"] as? String,
+                  (path as NSString).deletingLastPathComponent.lowercased() == folder.lowercased(),
+                  let taken = dropboxDate(entry["client_modified"]) ?? dropboxDate(entry["server_modified"])
+            else { return nil }
+            let month = monthKey(taken, calendar: calendar)
+            guard month < current else { return nil }
+            let base = folder == "/" ? "" : folder
+            return (from: path, to: "\(base)/Archive/\(month)/\(name)")
+        }
+    }
+
+    /// Checks at launch and every few hours; does the work once per month.
+    func startMonthlyArchiveSchedule() {
+        archiveTimer?.invalidate()
+        archiveTimer = Timer.scheduledTimer(withTimeInterval: 6 * 3600, repeats: true) { [weak self] _ in
+            MainActor.assumeIsolated { self?.archiveIfDue() }
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 60) { [weak self] in
+            MainActor.assumeIsolated { self?.archiveIfDue() }
+        }
+    }
+
+    func archiveIfDue(now: Date = Date(), calendar: Calendar = .current,
+                      completion: ((Result<Int, Error>) -> Void)? = nil) {
+        let month = Self.monthKey(now, calendar: calendar)
+        guard monthlyArchive, isSignedIn, !archiveRunning,
+              defaults.string(forKey: Self.lastArchiveMonthKey) != month else {
+            completion?(.success(0))
+            return
+        }
+        archiveRunning = true
+        let folder = folderPath
+        let generation = authGeneration
+        Task { [weak self] in
+            guard let self else { return }
+            do {
+                let entries = try await listTopLevel(folder, generation: generation)
+                let moves = Self.archiveMoves(entries: entries, folder: folder, now: now, calendar: calendar)
+                for move in moves { try await archiveMove(from: move.from, to: move.to, generation: generation) }
+                // Only mark the month done when every move landed.
+                defaults.set(month, forKey: Self.lastArchiveMonthKey)
+                archiveRunning = false
+                completion?(.success(moves.count))
+            } catch {
+                archiveRunning = false
+                #if DEBUG
+                print("Dropbox archive failed: \(error.localizedDescription)")
+                #endif
+                completion?(.failure(error))
+            }
+        }
+    }
+
+    private func listTopLevel(_ folder: String, generation: UUID) async throws -> [[String: Any]] {
+        var entries: [[String: Any]] = []
+        var request = try await apiRequest("/files/list_folder",
+            body: ["path": folder == "/" ? "" : folder, "recursive": false, "limit": 2000])
+        while true {
+            let (data, raw) = try await session.data(for: request)
+            guard let response = raw as? HTTPURLResponse else { throw URLError(.badServerResponse) }
+            try checkAccount(generation)
+            // No share folder yet: nothing to archive.
+            if response.statusCode == 409, String(decoding: data, as: UTF8.self).contains("not_found") { return [] }
+            let json = try Self.parseResponse(data, response: response)
+            entries += json["entries"] as? [[String: Any]] ?? []
+            guard json["has_more"] as? Bool == true, let cursor = json["cursor"] as? String else { return entries }
+            request = try await apiRequest("/files/list_folder/continue", body: ["cursor": cursor])
+        }
+    }
+
+    private func archiveMove(from: String, to: String, generation: UUID) async throws {
+        for attempt in 1...3 {
+            try checkAccount(generation)
+            let request = try await apiRequest("/files/move_v2",
+                body: ["from_path": from, "to_path": to, "autorename": true, "allow_ownership_transfer": false])
+            let (data, raw) = try await session.data(for: request)
+            guard let response = raw as? HTTPURLResponse else { throw URLError(.badServerResponse) }
+            if response.statusCode == 401, attempt < 3 { _ = try await validToken(forceRefresh: true); continue }
+            if try await shouldRetry(response, data: data, attempt: attempt) { continue }
+            // Removed by hand since the listing: nothing to move.
+            if response.statusCode == 409, String(decoding: data, as: UTF8.self).contains("from_lookup/not_found") { return }
+            _ = try Self.parseResponse(data, response: response)
+            return
+        }
+        throw Self.error("Could not archive \((from as NSString).lastPathComponent)")
     }
 }
 #endif

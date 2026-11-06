@@ -2052,6 +2052,10 @@ class SettingsWindowController: NSWindowController, NSToolbarDelegate, NSWindowD
         dropboxDirectCheckbox = NSButton(checkboxWithTitle: L("Direct links (open the file itself, not the Dropbox page)"), target: self, action: #selector(dropboxDirectChanged(_:)))
         dropboxDirectCheckbox.state = UserDefaults.standard.bool(forKey: "dropboxDirectLinks") ? .on : .off
         stack.addArrangedSubview(indented(dropboxDirectCheckbox))
+
+        let archiveCheckbox = NSButton(checkboxWithTitle: L("Each month, move last month's files into Archive/YYYY-MM"), target: self, action: #selector(dropboxArchiveChanged(_:)))
+        archiveCheckbox.state = DropboxUploader.shared.monthlyArchive ? .on : .off
+        stack.addArrangedSubview(indented(archiveCheckbox))
         stack.setCustomSpacing(4, after: stack.arrangedSubviews.last!)
 
         let dropboxNote = NSTextField(wrappingLabelWithString: L("Captures are saved into this Dropbox folder (default /Share), which syncs to the Dropbox folder on your Mac, and the link is copied to your clipboard. Expired links stop working for everyone, you included, but the file stays in your Dropbox. Create a Dropbox app with Full Dropbox access and the files.content.write, files.content.read, sharing.write, sharing.read and account_info.read permissions, then paste its App key above."))
@@ -2469,6 +2473,10 @@ class SettingsWindowController: NSWindowController, NSToolbarDelegate, NSWindowD
 
     @objc private func quickCaptureUploadsChanged(_ sender: NSButton) {
         UserDefaults.standard.set(sender.state == .on, forKey: "quickCaptureUploads")
+    }
+
+    @objc private func dropboxArchiveChanged(_ sender: NSButton) {
+        UserDefaults.standard.set(sender.state == .on, forKey: DropboxUploader.monthlyArchiveKey)
     }
 
     @objc private func dropboxExpiryChanged(_ sender: NSPopUpButton) {
