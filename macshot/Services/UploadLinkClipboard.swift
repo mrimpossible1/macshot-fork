@@ -21,8 +21,11 @@ enum UploadLinkClipboard {
         guard let components = URLComponents(string: link) else { return "Screenshot" }
         let file = components.queryItems?.first(where: { $0.name == "preview" })?.value
             ?? (components.path as NSString).lastPathComponent
+        // Links without a file name in them (Drive's ".../view", bare IDs)
+        // would show junk as the link text.
+        guard !(file as NSString).pathExtension.isEmpty else { return "Screenshot" }
         let name = (file as NSString).deletingPathExtension.trimmingCharacters(in: .whitespacesAndNewlines)
-        return name.isEmpty || name == "/" ? "Screenshot" : name
+        return name.isEmpty ? "Screenshot" : name
     }
 
     nonisolated static func markdown(link: String, name: String) -> String {

@@ -12,6 +12,9 @@ enum UploadPreparation {
         let image: NSImage
         let title: String?
         let redactedCount: Int
+        /// True when redaction was on but text recognition failed. The
+        /// caller must not upload: the image could not be checked.
+        let couldNotCheck: Bool
     }
 
     /// Used until types are picked in the capture toolbar's Auto-Redact menu.
@@ -25,46 +28,78 @@ enum UploadPreparation {
     static var autoRedact: Bool { UserDefaults.standard.object(forKey: autoRedactKey) as? Bool ?? true }
     static var readableNames: Bool { UserDefaults.standard.object(forKey: readableNamesKey) as? Bool ?? true }
 
-    static func prepare(_ image: NSImage, completion: @escaping (Prepared) -> Void) {
+    /// `wantsTitle` is false for providers that name files themselves.
+    static func prepare(_ image: NSImage, wantsTitle: Bool, completion: @escaping (Prepared) -> Void) {
         let redact = autoRedact
-        let name = readableNames
+        let name = wantsTitle && readableNames
         guard redact || name, let snapshot = try? HistoryImageSnapshot.Image(image) else {
-            completion(Prepared(image: image, title: nil, redactedCount: 0))
+            // Redaction on but the image can't be read: fail closed.
+            completion(Prepared(image: image, title: nil, redactedCount: 0, couldNotCheck: redact))
             return
         }
         let pixels = snapshot.pixels
         let pointSize = snapshot.pointSize
         let enabledTypes = (UserDefaults.standard.array(forKey: "enabledRedactTypes") as? [String]) ?? defaultTypes
-        VisionOCR.performTextRecognition(cgImage: pixels) { observations, _ in
-            DispatchQueue.main.async {
-                MainActor.assumeIsolated {
-                    let boxes = redact ? redactionBoxes(in: observations, enabledTypes: enabledTypes) : []
-                    var title: String?
-                    if name {
-                        let safeLines = observations
-                            .filter { !AutoRedactor.containsSensitiveText($0.text, enabledTypes: enabledTypes) }
-                            .map { (text: $0.text, box: $0.boundingBox) }
-                        title = ReadableCaptureName.title(from: safeLines)
-                    }
-                    var output = image
-                    if !boxes.isEmpty, let covered = cover(pixels, boxes: boxes) {
-                        output = NSImage(cgImage: covered, size: pointSize)
-                    }
-                    completion(Prepared(image: output, title: title, redactedCount: boxes.count))
+        recognize(pixels) { observations, error in
+            MainActor.assumeIsolated {
+                if redact, error != nil {
+                    completion(Prepared(image: image, title: nil, redactedCount: 0, couldNotCheck: true))
+                    return
                 }
+                let found = redact ? sensitiveRegions(in: observations, enabledTypes: enabledTypes, pointSize: pointSize)
+                                   : (boxes: [CGRect](), lines: Set<Int>())
+                var title: String?
+                if name {
+                    // Never name a file after a line that held sensitive text.
+                    let safeLines = observations.indices
+                        .filter { !found.lines.contains($0)
+                                  && !AutoRedactor.containsSensitiveText(observations[$0].text, enabledTypes: enabledTypes) }
+                        .map { (text: observations[$0].text, box: observations[$0].boundingBox) }
+                    title = ReadableCaptureName.title(from: safeLines)
+                }
+                var output = image
+                if !found.boxes.isEmpty {
+                    guard let covered = cover(pixels, boxes: found.boxes) else {
+                        completion(Prepared(image: image, title: nil, redactedCount: 0, couldNotCheck: true))
+                        return
+                    }
+                    output = NSImage(cgImage: covered, size: pointSize)
+                }
+                completion(Prepared(image: output, title: title, redactedCount: found.boxes.count, couldNotCheck: false))
             }
         }
     }
 
-    /// Normalized (Vision, bottom-left origin) rects of every sensitive match.
-    static func redactionBoxes(in observations: [OCRTextObservation], enabledTypes: [String]?) -> [CGRect] {
-        var boxes: [CGRect] = []
-        for observation in observations {
-            for match in AutoRedactor.sensitiveMatches(in: observation.text, enabledTypes: enabledTypes) {
-                boxes.append(observation.boundingBox(for: match.range) ?? observation.boundingBox)
+    /// Runs OCR off the main thread and delivers results on the main thread.
+    /// Nonisolated so the OCR callback isn't treated as main-actor code.
+    nonisolated private static func recognize(_ image: CGImage,
+                                              then handle: @escaping ([OCRTextObservation], Error?) -> Void) {
+        DispatchQueue.global(qos: .userInitiated).async {
+            VisionOCR.performTextRecognition(cgImage: image) { observations, error in
+                DispatchQueue.main.async { handle(observations, error) }
             }
         }
-        return boxes
+    }
+
+    /// Normalized (Vision, bottom-left origin) rects to cover, plus the
+    /// indexes of the lines they came from. Uses the same planner as the
+    /// editor's Auto-Redact, so card numbers split across lines are caught.
+    static func sensitiveRegions(in observations: [OCRTextObservation], enabledTypes: [String]?,
+                                 pointSize: CGSize) -> (boxes: [CGRect], lines: Set<Int>) {
+        let lines = observations.map { observation in
+            let box = observation.boundingBox
+            return PIIRedactionPlanner.Line(text: observation.text,
+                bounds: CGRect(x: box.minX * pointSize.width, y: box.minY * pointSize.height,
+                               width: box.width * pointSize.width, height: box.height * pointSize.height))
+        }
+        var boxes: [CGRect] = []
+        var indexes = Set<Int>()
+        for match in PIIRedactionPlanner.matches(in: lines, enabledTypes: enabledTypes) {
+            let observation = observations[match.lineIndex]
+            boxes.append(observation.boundingBox(for: match.range) ?? observation.boundingBox)
+            indexes.insert(match.lineIndex)
+        }
+        return (boxes, indexes)
     }
 
     /// Draws `image` and fills each normalized box (with a little padding)

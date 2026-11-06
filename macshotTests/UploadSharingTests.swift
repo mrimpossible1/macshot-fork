@@ -33,7 +33,7 @@ final class UploadSharingTests: XCTestCase {
         var components = DateComponents()
         components.year = 2026; components.month = 11; components.day = 6
         components.hour = 1; components.minute = 51; components.second = 7
-        let date = Calendar.current.date(from: components)!
+        let date = Calendar(identifier: .gregorian).date(from: components)!
         XCTAssertEqual(ReadableCaptureName.filename(title: "Payout settings", date: date), "Payout settings 2026-11-06 at 01.51.07")
     }
 
@@ -44,6 +44,7 @@ final class UploadSharingTests: XCTestCase {
                        "Payout settings")
         XCTAssertEqual(UploadLinkClipboard.displayName(forLink: "https://www.dropbox.com/home/Share?preview=Shot%201.png"), "Shot 1")
         XCTAssertEqual(UploadLinkClipboard.displayName(forLink: ""), "Screenshot")
+        XCTAssertEqual(UploadLinkClipboard.displayName(forLink: "https://drive.google.com/file/d/abc123/view"), "Screenshot")
     }
 
     func testMarkdownAndHTMLAreEscaped() {
@@ -60,13 +61,16 @@ final class UploadSharingTests: XCTestCase {
         let emailBox = CGRect(x: 0.3, y: 0.5, width: 0.3, height: 0.05)
         let observation = OCRTextObservation(text: text, boundingBox: CGRect(x: 0.1, y: 0.5, width: 0.8, height: 0.05)) { _ in emailBox }
         let plain = OCRTextObservation(text: "Nothing to hide here", boundingBox: CGRect(x: 0.1, y: 0.2, width: 0.5, height: 0.05))
-        let boxes = UploadPreparation.redactionBoxes(in: [observation, plain], enabledTypes: UploadPreparation.defaultTypes)
-        XCTAssertEqual(boxes, [emailBox])
+        let found = UploadPreparation.sensitiveRegions(in: [observation, plain], enabledTypes: UploadPreparation.defaultTypes,
+                                                       pointSize: CGSize(width: 1000, height: 800))
+        XCTAssertEqual(found.boxes, [emailBox])
+        XCTAssertEqual(found.lines, [0])
     }
 
     func testDefaultTypesLeaveDatesAlone() {
         let observation = OCRTextObservation(text: "Released 10/26 build 1024 768", boundingBox: CGRect(x: 0, y: 0, width: 1, height: 0.1))
-        XCTAssertTrue(UploadPreparation.redactionBoxes(in: [observation], enabledTypes: UploadPreparation.defaultTypes).isEmpty)
+        XCTAssertTrue(UploadPreparation.sensitiveRegions(in: [observation], enabledTypes: UploadPreparation.defaultTypes,
+                                                         pointSize: CGSize(width: 1000, height: 800)).boxes.isEmpty)
     }
 
     func testCoverFillsTheBoxAndKeepsTheRest() throws {

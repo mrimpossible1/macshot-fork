@@ -2238,7 +2238,11 @@ class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
 
         // Auto-redact sensitive text and name the file from its own text
         // before anything leaves the Mac (Settings → Uploads).
-        UploadPreparation.prepare(image) { prepared in
+        UploadPreparation.prepare(image, wantsTitle: provider == "dropbox") { prepared in
+            if prepared.couldNotCheck {
+                toast.showError(message: "Couldn't check this screenshot for sensitive text, so it wasn't uploaded. Try again, or turn off auto-redact in Settings → Uploads.")
+                return
+            }
             let image = prepared.image
             if provider == "dropbox" {
                 DropboxUploader.shared.uploadImage(image, title: prepared.title, progress: { fraction in
