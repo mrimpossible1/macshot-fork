@@ -902,3 +902,14 @@
 "After 30 days" = "After 30 days";
 "Link expires:" = "Link expires:";
 "Each month, move last month's files into Archive/YYYY-MM" = "Each month, move last month's files into Archive/YYYY-MM";
+"Before / After (Last 2 Captures)" = "Before / After (Last 2 Captures)";
+"Side-by-Side Image" = "Side-by-Side Image";
+"Animated GIF…" = "Animated GIF…";
+"Take two captures first. Your latest capture is After and the one before it is Before." = "Take two captures first. Your latest capture is After and the one before it is Before.";
+"Couldn't make the before/after image." = "Couldn't make the before/after image.";
+"Couldn't make the before/after GIF." = "Couldn't make the before/after GIF.";
+"Before/after GIF ready" = "Before/after GIF ready";
+"Fades between your last two captures (%@)." = "Fades between your last two captures (%@).";
+"Save…" = "Save…";
+"Upload to Dropbox & Copy Link" = "Upload to Dropbox & Copy Link";
+"Couldn't save the GIF: %@" = "Couldn't save the GIF: %@";

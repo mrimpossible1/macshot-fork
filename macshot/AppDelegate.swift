@@ -874,6 +874,19 @@ class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
         HotkeyManager.applyMenuShortcut(for: .historyOverlay, to: historyOverlayItem)
         menu.addItem(historyOverlayItem)
 
+        // Before / After from the two most recent captures
+        let beforeAfterItem = NSMenuItem(title: L("Before / After (Last 2 Captures)"), action: nil, keyEquivalent: "")
+        beforeAfterItem.image = NSImage(systemSymbolName: "rectangle.split.2x1", accessibilityDescription: nil)
+        let beforeAfterMenu = NSMenu()
+        let sideBySideItem = NSMenuItem(title: L("Side-by-Side Image"), action: #selector(makeBeforeAfterImage), keyEquivalent: "")
+        sideBySideItem.target = self
+        beforeAfterMenu.addItem(sideBySideItem)
+        let gifItem = NSMenuItem(title: L("Animated GIF…"), action: #selector(makeBeforeAfterGIF), keyEquivalent: "")
+        gifItem.target = self
+        beforeAfterMenu.addItem(gifItem)
+        beforeAfterItem.submenu = beforeAfterMenu
+        menu.addItem(beforeAfterItem)
+
         menu.addItem(NSMenuItem.separator())
 
         let openImageItem = NSMenuItem(title: L("Open Image..."), action: #selector(openImageFromMenu), keyEquivalent: "")
@@ -3676,4 +3689,122 @@ extension AppDelegate: NSMenuDelegate {
             ScreenshotHistory.shared.clear()
         }
     }
+}
+
+// MARK: - Before / After
+
+extension AppDelegate {
+    /// The two most recent captures: the older is Before, the newer is After.
+    private func lastTwoCaptures() -> (before: CGImage, after: CGImage)? {
+        let history = ScreenshotHistory.shared
+        let recent = Array(history.entries.sorted { $0.timestamp > $1.timestamp }.prefix(2))
+        guard recent.count == 2,
+              let after = history.loadImage(for: recent[0])?.cgImage(forProposedRect: nil, context: nil, hints: nil),
+              let before = history.loadImage(for: recent[1])?.cgImage(forProposedRect: nil, context: nil, hints: nil)
+        else { return nil }
+        return (before, after)
+    }
+
+    private func pointImage(_ image: CGImage) -> NSImage {
+        let scale = NSScreen.main?.backingScaleFactor ?? 2
+        return NSImage(cgImage: image, size: NSSize(width: CGFloat(image.width) / scale, height: CGFloat(image.height) / scale))
+    }
+
+    private var needTwoCapturesMessage: String {
+        L("Take two captures first. Your latest capture is After and the one before it is Before.")
+    }
+
+    @objc func makeBeforeAfterImage() {
+        guard let pair = lastTwoCaptures() else { showFailureToast(needTwoCapturesMessage); return }
+        guard let combined = BeforeAfterRenderer.sideBySide(before: pair.before, after: pair.after) else {
+            showFailureToast(L("Couldn't make the before/after image."))
+            return
+        }
+        // Opens in the editor, so it can be marked up, saved, copied or uploaded like any capture.
+        DetachedEditorWindowController.open(image: pointImage(combined))
+    }
+
+    @objc func makeBeforeAfterGIF() {
+        guard let pair = lastTwoCaptures() else { showFailureToast(needTwoCapturesMessage); return }
+        guard let data = BeforeAfterRenderer.gif(before: pair.before, after: pair.after) else {
+            showFailureToast(L("Couldn't make the before/after GIF."))
+            return
+        }
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.dateFormat = "yyyy-MM-dd 'at' HH.mm.ss"
+        let filename = "Before-After \(formatter.string(from: Date())).gif"
+
+        let alert = NSAlert()
+        alert.messageText = L("Before/after GIF ready")
+        alert.informativeText = String(format: L("Fades between your last two captures (%@)."),
+                                       ByteCountFormatter.string(fromByteCount: Int64(data.count), countStyle: .file))
+        alert.addButton(withTitle: L("Save…"))
+        #if !OFFLINE
+        let canUpload = DropboxUploader.shared.isSignedIn
+        if canUpload { alert.addButton(withTitle: L("Upload to Dropbox & Copy Link")) }
+        #endif
+        alert.addButton(withTitle: L("Cancel"))
+        NSApp.activate(ignoringOtherApps: true)
+        let response = alert.runModal()
+
+        if response == .alertFirstButtonReturn {
+            let panel = NSSavePanel()
+            panel.allowedContentTypes = [.gif]
+            panel.nameFieldStringValue = filename
+            if panel.runModal() == .OK, let url = panel.url {
+                do { try data.write(to: url, options: .atomic) }
+                catch { showFailureToast(String(format: L("Couldn't save the GIF: %@"), error.localizedDescription)) }
+            }
+        }
+        #if !OFFLINE
+        if canUpload, response == .alertSecondButtonReturn {
+            uploadBeforeAfterGIF(pair, filename: filename)
+        }
+        #endif
+        returnFocusIfNeeded()
+    }
+
+    #if !OFFLINE
+    /// Redacts both shots (per Settings → Uploads) before building the GIF
+    /// that leaves the Mac, then uploads it and copies the link.
+    private func uploadBeforeAfterGIF(_ pair: (before: CGImage, after: CGImage), filename: String) {
+        uploadToastController?.dismiss()
+        let toast = UploadToastController()
+        uploadToastController = toast
+        toast.onDismiss = { [weak self] in self?.uploadToastController = nil }
+        toast.show(status: "Uploading...")
+        let cannotCheck = "Couldn't check these screenshots for sensitive text, so the GIF wasn't uploaded. Try again, or turn off auto-redact in Settings → Uploads."
+
+        UploadPreparation.prepare(pointImage(pair.before), wantsTitle: false) { [weak self] before in
+            guard let self else { return }
+            UploadPreparation.prepare(self.pointImage(pair.after), wantsTitle: false) { after in
+                guard !before.couldNotCheck, !after.couldNotCheck else { toast.showError(message: cannotCheck); return }
+                guard let b = before.image.cgImage(forProposedRect: nil, context: nil, hints: nil),
+                      let a = after.image.cgImage(forProposedRect: nil, context: nil, hints: nil),
+                      let data = BeforeAfterRenderer.gif(before: b, after: a) else {
+                    toast.showError(message: "Couldn't make the before/after GIF.")
+                    return
+                }
+                let url = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString + ".gif")
+                do { try data.write(to: url, options: .atomic) } catch {
+                    toast.showError(message: error.localizedDescription)
+                    return
+                }
+                DropboxUploader.shared.upload(payload: .file(url), filename: filename, progress: { fraction in
+                    toast.updateProgress(fraction)
+                }) { result in
+                    try? FileManager.default.removeItem(at: url)
+                    switch result {
+                    case .success(let link):
+                        UploadLinkClipboard.copy(link)
+                        toast.showSuccess(link: link, deleteURL: "")
+                    case .failure(let error):
+                        toast.showError(message: error.localizedDescription)
+                    }
+                }
+            }
+        }
+    }
+    #endif
 }

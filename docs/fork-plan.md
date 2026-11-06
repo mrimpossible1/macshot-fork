@@ -21,38 +21,38 @@ Repo: https://github.com/mrimpossible1/macshot-fork (fork of https://github.com/
 - **Auto-redact before upload** (Settings → Uploads, on by default): one on-device OCR pass covers emails, phone numbers, card numbers, keys and tokens with solid boxes before a screenshot leaves the Mac. Your local copy keeps the original. Neither CleanShot nor Screen Studio does this.
 - **Readable file names** (Dropbox, on by default): files are named from the screenshot's most prominent text, e.g. `Payout settings 2026-11-06 at 01.51.07.png`, so `/Share` and the link itself read like what they show. Lines that were redacted are never used as names.
 - **Copy link as** (Settings → Uploads): plain URL, Markdown link `[Payout settings](https://…)`, or rich link that pastes into Slack, Notion, Google Docs or Mail as the clickable file name.
+- **Before / After** (menu bar → Before / After (Last 2 Captures)): your latest capture is After, the one before it is Before. "Side-by-Side Image" opens a labeled side-by-side (stacked for wide shots) in the editor, so you can mark it up, copy, save or upload it. "Animated GIF…" makes a looping GIF that fades between them; save it, or upload it to Dropbox and copy the link (both shots are auto-redacted first). Shottr has this; CleanShot doesn't.
+- **Text eraser** is upstream macshot's, not new here: Pixelate tool → Erase mode, plus "Text only" to erase just the lines of text and fill in the background around them.
 - **Auto Zoom new recordings** (Zoom panel, on by default): a fresh recording opens with zooms already placed from your clicks and typing, like Screen Studio. Turn it off to start with no zooms.
 
 ## Before daily use (do these once)
 
 1. **Dropbox app** (one time, about 2 minutes): see the PR description.
 
-## Screenshot tune-up (next)
+## Backburner
 
-Ordered by payoff:
+Not planned yet. Pick from here when something is actually missed in daily use.
 
-1. **Defaults for the share flow.** Provider = Dropbox, Enter uploads = on, direct links = on for images. Consider shipping these as the fork's defaults.
-2. **Readable file names.** Set the filename template (Settings → General) to something like `{date} {app}` so files in `/Share` sort and read well. Supported tokens live in `FilenameFormatter`.
-3. **Upload toast actions.** Add "Open in Dropbox" and "Copy direct link" buttons to `UploadToastController` next to the copied link.
-4. **Upload history.** Keep the last N Dropbox links in the menu bar menu (imgbb uploads already keep a list in `imgbbUploads`).
-5. **Menu bar shortcut for "Capture → Dropbox"** as its own global hotkey, so the normal Enter behavior can stay copy-to-clipboard.
-6. **Local fallback when offline.** If the upload fails, save the file into the local `~/Dropbox/Share` folder so Dropbox syncs it later, and copy the path.
+**Sharing**
+- Floating thumbnail: "Copy image" and "Copy link" buttons after an upload, like CleanShot.
+- Upload toast actions: "Open in Dropbox" and "Copy direct link".
+- Upload history: the last N Dropbox links in the menu bar menu.
+- A separate global hotkey for "Capture → Dropbox", so Enter can stay copy-to-clipboard.
+- Offline fallback: if an upload fails, save into the local `~/Dropbox/Share` folder so it syncs later.
+- Monthly archive summary in the upstream-review task ("Archive/2026-10 has 43 shots, 1.2 GB").
+- Password-protected or view-only (no download) links.
+- Ship the share flow as the fork's defaults (Dropbox provider, Enter uploads, direct links).
 
-## Video (bonus, mostly already there)
+**From Shottr**
+- Color contrast checker (WCAG 2.0 / APCA).
+- Average color of a selection, and more color formats (OKLCH).
+- On-screen guides for lining things up while measuring.
+- Combine any number of captures on one canvas (beyond before/after).
+- Pick the before/after pair from the history panel instead of the last two captures.
 
-Upstream macshot's Studio video editor already covers most of what Screen Studio does, per its own docs:
+**Video (vs. Screen Studio)**
+- Audio enhance: one-click volume normalize and noise reduction for the mic track.
+- Vertical/social export preset: one click to 9:16 with a matching look preset.
+- Test first: record a 1–2 minute demo with "Editable pointer" on, apply auto-zoom, export, compare with Screen Studio, and only build the gaps actually felt.
 
-- Pointer recorded separately, then smoothed with a spring, hidden when idle or typing, with click effects (`CursorMotion`).
-- **Auto-zoom** suggestions from clicks and typing that follow the pointer (`AutoZoomPlanner`), plus a camera path with motion blur.
-- Frame/background styling, keystroke overlays, webcam bubble, on-device captions, MP4 and GIF export.
-
-This fork adds look presets and auto-zoom on open (above). Remaining Screen Studio gaps worth considering:
-
-- **Audio enhance**: one-click volume normalize and noise reduction for the mic track (Screen Studio has this; macshot only mixes track volumes).
-- **Vertical/social export preset**: one click to 9:16 with a matching look preset.
-
-Next, **test before building more**:
-
-1. Record a 1–2 minute demo with "Editable pointer" on, open it in the editor, apply auto-zoom, export, and compare against the same demo in Screen Studio.
-2. Write down the gaps you actually feel (likely candidates: zoom presets you can save, auto-applying your look on stop, export presets for vertical social video).
-3. Build only those. Upload to Dropbox already works from the editor.
+Upstream macshot's Studio video editor already covers most of Screen Studio: recorded pointer with spring smoothing and click effects (`CursorMotion`), auto-zoom from clicks and typing (`AutoZoomPlanner`) with a motion-blurred camera path, frame/background styling, keystroke overlays, webcam bubble, on-device captions, MP4 and GIF export.
