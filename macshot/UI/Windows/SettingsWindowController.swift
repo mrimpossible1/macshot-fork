@@ -2856,7 +2856,7 @@ class SettingsWindowController: NSWindowController, NSToolbarDelegate, NSWindowD
         let stacking = UserDefaults.standard.object(forKey: "thumbnailStacking") as? Bool ?? true
         thumbnailStackingPopup.selectItem(at: stacking ? 0 : 1)
 
-        let thumbnailCorner = UserDefaults.standard.string(forKey: "thumbnailCorner") ?? "bottomRight"
+        let thumbnailCorner = UserDefaults.standard.string(forKey: "thumbnailCorner") ?? "bottomLeft"
         switch thumbnailCorner {
         case "bottomLeft": thumbnailCornerPopup.selectItem(at: 1)
         case "topRight": thumbnailCornerPopup.selectItem(at: 2)

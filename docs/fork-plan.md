@@ -23,6 +23,7 @@ Repo: https://github.com/mrimpossible1/macshot-fork (fork of https://github.com/
 - **Copy link as** (Settings → Uploads): plain URL, Markdown link `[Payout settings](https://…)`, or rich link that pastes into Slack, Notion, Google Docs or Mail as the clickable file name.
 - **Before / After** (menu bar → Before / After (Last 2 Captures)): your latest capture is After, the one before it is Before. "Side-by-Side Image" opens a labeled side-by-side (stacked for wide shots) in the editor, so you can mark it up, copy, save or upload it. "Animated GIF…" makes a looping GIF that fades between them; save it, or upload it to Dropbox and copy the link (both shots are auto-redacted first). Shottr has this; CleanShot doesn't.
 - **Text eraser** is upstream macshot's, not new here: Pixelate tool → Erase mode, plus "Text only" to erase just the lines of text and fill in the background around them.
+- **CleanShot-style defaults**: ⌘⇧4 captures an area and ⌘⇧3 the full screen (turn off the macOS versions in System Settings → Keyboard → Keyboard Shortcuts → Screenshots so MacShotty gets them), and the floating thumbnail appears bottom-left. Both can be changed in Settings.
 - **Auto Zoom new recordings** (Zoom panel, on by default): a fresh recording opens with zooms already placed from your clicks and typing, like Screen Studio. Turn it off to start with no zooms.
 
 ## Before daily use

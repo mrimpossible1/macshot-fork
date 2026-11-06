@@ -2109,8 +2109,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
     }
 
     private func thumbnailCorner() -> FloatingThumbnailCorner {
-        let rawValue = UserDefaults.standard.string(forKey: "thumbnailCorner") ?? FloatingThumbnailCorner.bottomRight.rawValue
-        return FloatingThumbnailCorner(rawValue: rawValue) ?? .bottomRight
+        let rawValue = UserDefaults.standard.string(forKey: "thumbnailCorner") ?? FloatingThumbnailCorner.bottomLeft.rawValue
+        return FloatingThumbnailCorner(rawValue: rawValue) ?? .bottomLeft
     }
 
     private func thumbnailX(
