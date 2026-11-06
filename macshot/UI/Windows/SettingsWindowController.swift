@@ -2011,7 +2011,7 @@ class SettingsWindowController: NSWindowController, NSToolbarDelegate, NSWindowD
         dropboxAppKeyField.stringValue = UserDefaults.standard.string(forKey: "dropboxAppKey") ?? ""
         dropboxAppKeyField.target = self
         dropboxAppKeyField.action = #selector(dropboxFieldChanged(_:))
-        stack.addArrangedSubview(labeledRow(L("App Key:"), controls: [dropboxAppKeyField]))
+        // MacShotty has its own Dropbox app built in, so the key field stays hidden.
 
         dropboxStatusLabel = NSTextField(labelWithString: "")
         dropboxStatusLabel.font = NSFont.systemFont(ofSize: 11)
@@ -2058,7 +2058,7 @@ class SettingsWindowController: NSWindowController, NSToolbarDelegate, NSWindowD
         stack.addArrangedSubview(indented(archiveCheckbox))
         stack.setCustomSpacing(4, after: stack.arrangedSubviews.last!)
 
-        let dropboxNote = NSTextField(wrappingLabelWithString: L("Captures are saved into this Dropbox folder (default /Share), which syncs to the Dropbox folder on your Mac, and the link is copied to your clipboard. Expired links stop working for everyone, you included, but the file stays in your Dropbox. Create a Dropbox app with Full Dropbox access and the files.content.write, files.content.read, sharing.write, sharing.read and account_info.read permissions, then paste its App key above."))
+        let dropboxNote = NSTextField(wrappingLabelWithString: L("Captures are saved into this Dropbox folder (default /Share), which syncs to the Dropbox folder on your Mac, and the link is copied to your clipboard. Expired links stop working for everyone, you included, but the file stays in your Dropbox."))
         dropboxNote.font = NSFont.systemFont(ofSize: 10)
         dropboxNote.textColor = .secondaryLabelColor
         stack.addArrangedSubview(indented(dropboxNote))
@@ -2440,7 +2440,7 @@ class SettingsWindowController: NSWindowController, NSToolbarDelegate, NSWindowD
     @objc private func dropboxFieldChanged(_ sender: NSTextField) {
         let newKey = dropboxAppKeyField.stringValue.trimmingCharacters(in: .whitespacesAndNewlines)
         // A refresh token only works with the app that issued it.
-        if newKey != DropboxUploader.shared.appKey, DropboxUploader.shared.isSignedIn { DropboxUploader.shared.signOut() }
+        if newKey != (UserDefaults.standard.string(forKey: "dropboxAppKey") ?? ""), DropboxUploader.shared.isSignedIn { DropboxUploader.shared.signOut() }
         UserDefaults.standard.set(newKey, forKey: "dropboxAppKey")
         UserDefaults.standard.set(dropboxFolderField.stringValue, forKey: "dropboxFolder")
         updateDropboxStatus()

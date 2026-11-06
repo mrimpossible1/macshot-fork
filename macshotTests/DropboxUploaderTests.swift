@@ -166,6 +166,13 @@ final class DropboxUploaderTests: XCTestCase {
         await MediaExportCoordinator.shared.waitUntilIdle()
     }
 
+    func testBuiltInAppKeyIsUsedUnlessOneIsSaved() throws {
+        let uploader = try dropbox()
+        XCTAssertEqual(uploader.appKey, "fixture-app-key")
+        defaults.removeObject(forKey: "dropboxAppKey")
+        XCTAssertEqual(uploader.appKey, DropboxUploader.builtInAppKey)
+    }
+
     func testLinkSettingsCarryExpiry() {
         let now = Date(timeIntervalSince1970: 1_800_000_000)
         let week = DropboxUploader.linkSettings(audience: .publicLink, expiryDays: 7, now: now)

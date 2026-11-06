@@ -913,3 +913,4 @@
 "Save…" = "Save…";
 "Upload to Dropbox & Copy Link" = "Upload to Dropbox & Copy Link";
 "Couldn't save the GIF: %@" = "Couldn't save the GIF: %@";
+"Captures are saved into this Dropbox folder (default /Share), which syncs to the Dropbox folder on your Mac, and the link is copied to your clipboard. Expired links stop working for everyone, you included, but the file stays in your Dropbox." = "Captures are saved into this Dropbox folder (default /Share), which syncs to the Dropbox folder on your Mac, and the link is copied to your clipboard. Expired links stop working for everyone, you included, but the file stays in your Dropbox.";

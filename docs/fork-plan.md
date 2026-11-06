@@ -8,7 +8,7 @@ Repo: https://github.com/mrimpossible1/macshot-fork (fork of https://github.com/
 
 ## Done in this branch
 
-- **Dropbox uploader** (`macshot/Upload/DropboxUploader.swift`): sign-in with your own Dropbox app (OAuth2 PKCE, no secret in the app), uploads to `/Share` (configurable), never overwrites (`add` + autorename), creates a link. Recordings over 140 MB go up in 32 MB chunks through an upload session.
+- **Dropbox uploader** (`macshot/Upload/DropboxUploader.swift`): Settings → Uploads → Dropbox → Connect, then approve on Dropbox's page. MacShotty's own Dropbox app ("MacShotty" in Joel's developer console, key built in as `DropboxUploader.builtInAppKey`, OAuth2 PKCE, no secret in the app), uploads to `/Share` (configurable), never overwrites (`add` + autorename), creates a link. Recordings over 140 MB go up in 32 MB chunks through an upload session.
 - **Link options** (Settings → Uploads → Dropbox): public link, team-only link (Dropbox Business), or no link. Optional direct links (`raw=1`) so an image link opens the image itself and previews inline in Slack/iMessage.
 - **Links expire after 7 days** (Settings → Uploads → Dropbox → Link expires: Never / 1 / 7 / 30 days, default 7). Expiry applies to everyone, including you; the file stays in Dropbox. Needs a paid Dropbox plan: on Basic the upload stops with a clear message instead of quietly making a permanent link.
 - **Monthly archive** (Settings → Uploads → Dropbox, on by default): on the 1st (or the first time the app runs that month), files left in the top of `/Share` from earlier months move into `/Share/Archive/YYYY-MM`, by the month they were taken. Nothing is deleted; subfolders you made are left alone; links keep working. Review each month's folder and delete what you don't need.
@@ -25,9 +25,9 @@ Repo: https://github.com/mrimpossible1/macshot-fork (fork of https://github.com/
 - **Text eraser** is upstream macshot's, not new here: Pixelate tool → Erase mode, plus "Text only" to erase just the lines of text and fill in the background around them.
 - **Auto Zoom new recordings** (Zoom panel, on by default): a fresh recording opens with zooms already placed from your clicks and typing, like Screen Studio. Turn it off to start with no zooms.
 
-## Before daily use (do these once)
+## Before daily use
 
-1. **Dropbox app** (one time, about 2 minutes): see the PR description.
+Nothing to set up: the Dropbox app is created and its key is built in. Install with the `Install MacShotty.command` script, grant Screen Recording, then Settings → Uploads → Dropbox → Connect.
 
 ## Backburner
 

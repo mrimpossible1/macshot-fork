@@ -26,7 +26,7 @@ final class DropboxUploader: NSObject, ASWebAuthenticationPresentationContextPro
     /// upload session above this size.
     nonisolated static let singleUploadLimit = 140 * 1024 * 1024
     nonisolated static let sessionChunkSize = 32 * 1024 * 1024
-    private let scopes = "account_info.read files.content.write files.content.read sharing.write sharing.read"
+    private let scopes = "account_info.read files.metadata.read files.content.write files.content.read sharing.write sharing.read"
     private let authorizeURL = "https://www.dropbox.com/oauth2/authorize"
     private let tokenURL = "https://api.dropboxapi.com/oauth2/token"
     private let apiURL = "https://api.dropboxapi.com/2"
@@ -57,9 +57,14 @@ final class DropboxUploader: NSObject, ASWebAuthenticationPresentationContextPro
 
     // MARK: - Settings
 
-    /// The App key from the user's app at https://www.dropbox.com/developers/apps
+    /// MacShotty's own Dropbox app (Joel's, dropbox.com/developers/apps).
+    /// An app key is public by design: sign-in uses PKCE, so there is no
+    /// secret in the app. A key saved in settings overrides it.
+    nonisolated static let builtInAppKey = "ly97nub7gprbe6l"
+
     var appKey: String {
-        defaults.string(forKey: "dropboxAppKey")?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let saved = defaults.string(forKey: "dropboxAppKey")?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        return saved.isEmpty ? Self.builtInAppKey : saved
     }
     var isSignedIn: Bool { loadRefreshToken() != nil }
     var accountName: String? { defaults.string(forKey: "dropboxAccountName") }
