@@ -1,6 +1,8 @@
 # Fork plan: screenshots first, video as a bonus
 
-This fork adds one thing on top of upstream macshot: every capture can land in a Dropbox `/Share` folder with a share link on the clipboard. This file tracks what is done and what comes next.
+This fork adds Dropbox sharing on top of upstream macshot: every capture can land in a Dropbox `/Share` folder with a share link on the clipboard, redacted and readably named first. This file tracks what is done and what comes next.
+
+Repo: https://github.com/mrimpossible1/macshot (fork of https://github.com/sw33tLie/macshot). Get it with `git clone https://github.com/mrimpossible1/macshot`, open `macshot.xcodeproj` in Xcode and press ⌘R.
 
 ## Done in this branch
 
