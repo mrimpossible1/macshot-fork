@@ -2403,7 +2403,10 @@ class SettingsWindowController: NSWindowController, NSToolbarDelegate, NSWindowD
     }
 
     @objc private func dropboxFieldChanged(_ sender: NSTextField) {
-        UserDefaults.standard.set(dropboxAppKeyField.stringValue.trimmingCharacters(in: .whitespacesAndNewlines), forKey: "dropboxAppKey")
+        let newKey = dropboxAppKeyField.stringValue.trimmingCharacters(in: .whitespacesAndNewlines)
+        // A refresh token only works with the app that issued it.
+        if newKey != DropboxUploader.shared.appKey, DropboxUploader.shared.isSignedIn { DropboxUploader.shared.signOut() }
+        UserDefaults.standard.set(newKey, forKey: "dropboxAppKey")
         UserDefaults.standard.set(dropboxFolderField.stringValue, forKey: "dropboxFolder")
         updateDropboxStatus()
     }

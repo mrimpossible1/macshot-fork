@@ -161,7 +161,7 @@ final class DropboxUploaderTests: XCTestCase {
             return .init(status: 200, body: Self.json(["id": "id:abc", "path_display": "/Clips/shot (1).png"]))
         }
         let result = try await upload(uploader, .data(Data([1])), name: "shot.png")
-        XCTAssertEqual(result, "dropbox:/Clips/shot (1).png")
+        XCTAssertEqual(result, "https://www.dropbox.com/home/Clips?preview=shot%20(1).png")
         await MediaExportCoordinator.shared.waitUntilIdle()
     }
 

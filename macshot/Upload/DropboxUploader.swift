@@ -95,6 +95,16 @@ final class DropboxUploader: NSObject, ASWebAuthenticationPresentationContextPro
         return components.url?.absoluteString ?? link
     }
 
+    /// The owner-only dropbox.com page for a file: its folder, previewing it.
+    nonisolated static func webURL(forPath path: String) -> String {
+        let folder = (path as NSString).deletingLastPathComponent
+        let name = (path as NSString).lastPathComponent
+        var components = URLComponents(string: "https://www.dropbox.com")!
+        components.path = "/home" + (folder == "/" ? "" : folder)
+        components.queryItems = [URLQueryItem(name: "preview", value: name)]
+        return components.url?.absoluteString ?? "https://www.dropbox.com/home"
+    }
+
     /// The `Dropbox-API-Arg` header must be ASCII. Non-ASCII characters (an
     /// accented window title in the filename, say) are escaped as `\uXXXX`.
     nonisolated static func apiArgHeader(_ object: Any) throws -> String {
@@ -102,7 +112,7 @@ final class DropboxUploader: NSObject, ASWebAuthenticationPresentationContextPro
         guard let json = String(data: data, encoding: .utf8) else { throw error("Could not encode request") }
         var out = ""
         for unit in json.utf16 {
-            if unit < 0x80 { out.unicodeScalars.append(Unicode.Scalar(unit)!) }
+            if unit < 0x7F { out.unicodeScalars.append(Unicode.Scalar(unit)!) }
             else { out += String(format: "\\u%04x", unit) }
         }
         return out
@@ -274,8 +284,9 @@ final class DropboxUploader: NSObject, ASWebAuthenticationPresentationContextPro
             }
             let storedPath = stored["path_display"] as? String ?? path
             guard audience != .none else {
-                // No link wanted: report where the file landed in Dropbox.
-                return "dropbox:" + storedPath
+                // No link wanted: hand back the file's page on dropbox.com
+                // (only the owner can open it) so the toast still has a real URL.
+                return Self.webURL(forPath: storedPath)
             }
             let fileRef = stored["id"] as? String ?? storedPath
             let link = try await sharedLink(for: fileRef, audience: audience, generation: generation)
@@ -393,6 +404,14 @@ final class DropboxUploader: NSObject, ASWebAuthenticationPresentationContextPro
                 try checkAccount(generation)
                 if response.statusCode == 401, attempt < 3 { _ = try await validToken(forceRefresh: true); continue }
                 if try await shouldRetry(response, data: data, attempt: attempt) { continue }
+                // A retried append whose first attempt landed: Dropbox already
+                // has these bytes and reports the offset it expects next.
+                if response.statusCode == 409, attempt > 1,
+                   let expected = (arg["cursor"] as? [String: Any])?["offset"] as? Int,
+                   let correct = Self.correctOffset(in: data), correct == expected + chunk.count,
+                   endpoint.hasSuffix("append_v2") {
+                    return [:]
+                }
                 // append_v2 answers with an empty body ("null").
                 if (200...299).contains(response.statusCode),
                    (try? JSONSerialization.jsonObject(with: data, options: [.fragmentsAllowed])) is NSNull || data.isEmpty {
@@ -438,13 +457,25 @@ final class DropboxUploader: NSObject, ASWebAuthenticationPresentationContextPro
                 }
                 // A personal account can't make team-only links. Fall back to
                 // the account's default link settings rather than failing.
-                if summary.hasPrefix("settings_error"), settings != nil { settings = nil; continue }
+                if summary.hasPrefix("settings_error") {
+                    // Never fall back from team-only to the account default,
+                    // which on a personal account is a public link.
+                    if audience == .team { throw Self.error("Team-only links need a Dropbox Business account. Pick another link type in Settings.") }
+                    if settings != nil { settings = nil; continue }
+                }
             }
             let json = try Self.parseResponse(data, response: response)
             guard let url = json["url"] as? String else { throw Self.error("Dropbox returned no link") }
             return url
         }
         throw Self.error("Could not create a Dropbox link")
+    }
+
+    nonisolated static func correctOffset(in data: Data) -> Int? {
+        let json = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any]
+        let error = json?["error"] as? [String: Any]
+        let lookup = error?["incorrect_offset"] as? [String: Any] ?? error
+        return lookup?["correct_offset"] as? Int
     }
 
     nonisolated static func existingLinkURL(in errorJSON: [String: Any]?) -> String? {
@@ -472,6 +503,11 @@ final class DropboxUploader: NSObject, ASWebAuthenticationPresentationContextPro
         if response.statusCode == 429 {
             let seconds = Double(response.value(forHTTPHeaderField: "Retry-After") ?? "") ?? Double(attempt * 2)
             try await Task.sleep(nanoseconds: UInt64(min(max(seconds, 1), 30) * 1_000_000_000))
+            return true
+        }
+        let summary = ((try? JSONSerialization.jsonObject(with: data)) as? [String: Any])?["error_summary"] as? String ?? ""
+        if response.statusCode == 409, summary.contains("too_many_write_operations") {
+            try await Task.sleep(nanoseconds: UInt64(attempt) * 1_000_000_000)
             return true
         }
         if (500...599).contains(response.statusCode) {
