@@ -72,6 +72,26 @@ final class DropboxUploader: NSObject, ASWebAuthenticationPresentationContextPro
     /// (embeddable, previews in Slack/iMessage) instead of the Dropbox viewer.
     var directLinks: Bool { defaults.bool(forKey: "dropboxDirectLinks") }
 
+    /// Days until a new link stops working for everyone (owner included; the
+    /// file itself stays in Dropbox). 0 = never. Defaults to 7.
+    nonisolated static let linkExpiryKey = "dropboxLinkExpiryDays"
+    nonisolated static let expiryChoices = [0, 1, 7, 30]
+    var linkExpiryDays: Int {
+        let days = defaults.object(forKey: Self.linkExpiryKey) as? Int ?? 7
+        return Self.expiryChoices.contains(days) ? days : 7
+    }
+
+    /// The `settings` object for `create_shared_link_with_settings`.
+    nonisolated static func linkSettings(audience: LinkAudience, expiryDays: Int, now: Date = Date()) -> [String: Any] {
+        var settings: [String: Any] = ["audience": audience.rawValue, "access": "viewer"]
+        if expiryDays > 0 {
+            let formatter = ISO8601DateFormatter()
+            formatter.formatOptions = [.withInternetDateTime]
+            settings["expires"] = formatter.string(from: now.addingTimeInterval(TimeInterval(expiryDays) * 86_400))
+        }
+        return settings
+    }
+
     /// `"Share"`, `"/Share/"`, `" /Share "` → `"/Share"`. Empty → the default.
     nonisolated static func normalizedFolder(_ raw: String?) -> String {
         let trimmed = (raw ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
@@ -440,7 +460,8 @@ final class DropboxUploader: NSObject, ASWebAuthenticationPresentationContextPro
     }
 
     private func sharedLink(for fileRef: String, audience: LinkAudience, generation: UUID) async throws -> String {
-        var settings: [String: Any]? = ["audience": audience.rawValue, "access": "viewer"]
+        let expiryDays = linkExpiryDays
+        var settings: [String: Any]? = Self.linkSettings(audience: audience, expiryDays: expiryDays)
         for attempt in 1...3 {
             try checkAccount(generation)
             var body: [String: Any] = ["path": fileRef]
@@ -464,6 +485,10 @@ final class DropboxUploader: NSObject, ASWebAuthenticationPresentationContextPro
                     // Never fall back from team-only to the account default,
                     // which on a personal account is a public link.
                     if audience == .team { throw Self.error("Team-only links need a Dropbox Business account. Pick another link type in Settings.") }
+                    // Never trade an expiring link for one that lasts forever.
+                    if expiryDays > 0 {
+                        throw Self.error("Expiring links need a paid Dropbox plan (Plus or higher). The file was saved to Dropbox. Set Link expires to Never in Settings to get links on this plan.")
+                    }
                     if settings != nil { settings = nil; continue }
                 }
             }

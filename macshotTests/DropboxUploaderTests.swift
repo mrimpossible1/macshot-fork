@@ -126,6 +126,7 @@ final class DropboxUploaderTests: XCTestCase {
                 let sent = try JSONSerialization.jsonObject(with: body) as? [String: Any]
                 XCTAssertEqual(sent?["path"] as? String, "id:abc")
                 XCTAssertEqual((sent?["settings"] as? [String: Any])?["audience"] as? String, "public")
+                XCTAssertNotNil((sent?["settings"] as? [String: Any])?["expires"], "links expire after 7 days by default")
                 return .init(status: 200, body: Self.json(["url": "https://www.dropbox.com/scl/fi/abc/shot.png?rlkey=k&dl=0"]))
             default:
                 XCTFail("unexpected request \(request.url?.absoluteString ?? "")")
@@ -162,6 +163,51 @@ final class DropboxUploaderTests: XCTestCase {
         }
         let result = try await upload(uploader, .data(Data([1])), name: "shot.png")
         XCTAssertEqual(result, "https://www.dropbox.com/home/Clips?preview=shot%20(1).png")
+        await MediaExportCoordinator.shared.waitUntilIdle()
+    }
+
+    func testLinkSettingsCarryExpiry() {
+        let now = Date(timeIntervalSince1970: 1_800_000_000)
+        let week = DropboxUploader.linkSettings(audience: .publicLink, expiryDays: 7, now: now)
+        XCTAssertEqual(week["expires"] as? String, "2027-01-22T08:00:00Z")
+        XCTAssertNil(DropboxUploader.linkSettings(audience: .publicLink, expiryDays: 0, now: now)["expires"])
+    }
+
+    func testExpiringLinkOnBasicPlanFailsInsteadOfMakingAPermanentOne() async throws {
+        let uploader = try dropbox()
+        var linkRequests = 0
+        respond { request, _ in
+            if request.url?.path == "/2/files/upload" {
+                return .init(status: 200, body: Self.json(["id": "id:abc", "path_display": "/Share/shot.png"]))
+            }
+            linkRequests += 1
+            return .init(status: 409, body: Self.json(["error_summary": "settings_error/not_authorized/.."]))
+        }
+        do {
+            _ = try await upload(uploader, .data(Data([1])), name: "shot.png")
+            XCTFail("should not fall back to a link that never expires")
+        } catch {
+            XCTAssertTrue(error.localizedDescription.contains("Expiring links"))
+        }
+        XCTAssertEqual(linkRequests, 1)
+        await MediaExportCoordinator.shared.waitUntilIdle()
+    }
+
+    func testNeverExpiringStillFallsBackToAccountDefault() async throws {
+        defaults.set(0, forKey: DropboxUploader.linkExpiryKey)
+        let uploader = try dropbox()
+        respond { request, body in
+            if request.url?.path == "/2/files/upload" {
+                return .init(status: 200, body: Self.json(["id": "id:abc", "path_display": "/Share/shot.png"]))
+            }
+            let sent = try JSONSerialization.jsonObject(with: body) as? [String: Any]
+            if sent?["settings"] != nil {
+                return .init(status: 409, body: Self.json(["error_summary": "settings_error/not_authorized/.."]))
+            }
+            return .init(status: 200, body: Self.json(["url": "https://www.dropbox.com/scl/fi/abc/shot.png?dl=0"]))
+        }
+        let link = try await upload(uploader, .data(Data([1])), name: "shot.png")
+        XCTAssertEqual(link, "https://www.dropbox.com/scl/fi/abc/shot.png?dl=0")
         await MediaExportCoordinator.shared.waitUntilIdle()
     }
 

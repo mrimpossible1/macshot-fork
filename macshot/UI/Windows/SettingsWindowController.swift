@@ -2042,12 +2042,19 @@ class SettingsWindowController: NSWindowController, NSToolbarDelegate, NSWindowD
         dropboxLinkPopup.action = #selector(dropboxLinkChanged(_:))
         stack.addArrangedSubview(labeledRow(L("Link:"), controls: [dropboxLinkPopup]))
 
+        let expiryPopup = NSPopUpButton()
+        expiryPopup.addItems(withTitles: [L("Never"), L("After 1 day"), L("After 7 days"), L("After 30 days")])
+        expiryPopup.selectItem(at: DropboxUploader.expiryChoices.firstIndex(of: DropboxUploader.shared.linkExpiryDays) ?? 2)
+        expiryPopup.target = self
+        expiryPopup.action = #selector(dropboxExpiryChanged(_:))
+        stack.addArrangedSubview(labeledRow(L("Link expires:"), controls: [expiryPopup]))
+
         dropboxDirectCheckbox = NSButton(checkboxWithTitle: L("Direct links (open the file itself, not the Dropbox page)"), target: self, action: #selector(dropboxDirectChanged(_:)))
         dropboxDirectCheckbox.state = UserDefaults.standard.bool(forKey: "dropboxDirectLinks") ? .on : .off
         stack.addArrangedSubview(indented(dropboxDirectCheckbox))
         stack.setCustomSpacing(4, after: stack.arrangedSubviews.last!)
 
-        let dropboxNote = NSTextField(wrappingLabelWithString: L("Captures are saved into this Dropbox folder (default /Share), which syncs to the Dropbox folder on your Mac, and the link is copied to your clipboard. Create a Dropbox app with Full Dropbox access and the files.content.write, files.content.read, sharing.write, sharing.read and account_info.read permissions, then paste its App key above."))
+        let dropboxNote = NSTextField(wrappingLabelWithString: L("Captures are saved into this Dropbox folder (default /Share), which syncs to the Dropbox folder on your Mac, and the link is copied to your clipboard. Expired links stop working for everyone, you included, but the file stays in your Dropbox. Create a Dropbox app with Full Dropbox access and the files.content.write, files.content.read, sharing.write, sharing.read and account_info.read permissions, then paste its App key above."))
         dropboxNote.font = NSFont.systemFont(ofSize: 10)
         dropboxNote.textColor = .secondaryLabelColor
         stack.addArrangedSubview(indented(dropboxNote))
@@ -2462,6 +2469,12 @@ class SettingsWindowController: NSWindowController, NSToolbarDelegate, NSWindowD
 
     @objc private func quickCaptureUploadsChanged(_ sender: NSButton) {
         UserDefaults.standard.set(sender.state == .on, forKey: "quickCaptureUploads")
+    }
+
+    @objc private func dropboxExpiryChanged(_ sender: NSPopUpButton) {
+        let choices = DropboxUploader.expiryChoices
+        guard choices.indices.contains(sender.indexOfSelectedItem) else { return }
+        UserDefaults.standard.set(choices[sender.indexOfSelectedItem], forKey: DropboxUploader.linkExpiryKey)
     }
 
     @objc private func dropboxDirectChanged(_ sender: NSButton) {

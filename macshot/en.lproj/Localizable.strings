@@ -375,7 +375,7 @@
 "Team-only link (Dropbox Business)" = "Team-only link (Dropbox Business)";
 "No link, just save the file" = "No link, just save the file";
 "Direct links (open the file itself, not the Dropbox page)" = "Direct links (open the file itself, not the Dropbox page)";
-"Captures are saved into this Dropbox folder (default /Share), which syncs to the Dropbox folder on your Mac, and the link is copied to your clipboard. Create a Dropbox app with Full Dropbox access and the files.content.write, files.content.read, sharing.write, sharing.read and account_info.read permissions, then paste its App key above." = "Captures are saved into this Dropbox folder (default /Share), which syncs to the Dropbox folder on your Mac, and the link is copied to your clipboard. Create a Dropbox app with Full Dropbox access and the files.content.write, files.content.read, sharing.write, sharing.read and account_info.read permissions, then paste its App key above.";
+"Captures are saved into this Dropbox folder (default /Share), which syncs to the Dropbox folder on your Mac, and the link is copied to your clipboard. Expired links stop working for everyone, you included, but the file stays in your Dropbox. Create a Dropbox app with Full Dropbox access and the files.content.write, files.content.read, sharing.write, sharing.read and account_info.read permissions, then paste its App key above." = "Captures are saved into this Dropbox folder (default /Share), which syncs to the Dropbox folder on your Mac, and the link is copied to your clipboard. Expired links stop working for everyone, you included, but the file stays in your Dropbox. Create a Dropbox app with Full Dropbox access and the files.content.write, files.content.read, sharing.write, sharing.read and account_info.read permissions, then paste its App key above.";
 "Folder:" = "Folder:";
 "Account:" = "Account:";
 "Test Connection" = "Test Connection";
@@ -896,3 +896,8 @@
 
 "Snap webcam to corners when moved" = "Snap webcam to corners when moved";
 "Search emoji" = "Search emoji";
+"Never" = "Never";
+"After 1 day" = "After 1 day";
+"After 7 days" = "After 7 days";
+"After 30 days" = "After 30 days";
+"Link expires:" = "Link expires:";
