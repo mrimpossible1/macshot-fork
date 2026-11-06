@@ -1,4 +1,6 @@
-# Fork plan: screenshots first, video as a bonus
+# MacShotty fork plan: screenshots first, video as a bonus
+
+MacShotty is a personal fork of macshot. It has its own name and app ID (`com.mrimpossible1.macshotty`), so it can be installed next to the official macshot.
 
 This fork adds Dropbox sharing on top of upstream macshot: every capture can land in a Dropbox `/Share` folder with a share link on the clipboard, redacted and readably named first. This file tracks what is done and what comes next.
 
@@ -23,8 +25,7 @@ Repo: https://github.com/mrimpossible1/macshot-fork (fork of https://github.com/
 
 ## Before daily use (do these once)
 
-1. **Bundle ID.** The fork still uses `com.sw33tlie.macshot.macshot`. Fine if you replace the official app; change it in the project settings if you want both installed side by side.
-2. **Dropbox app** (one time, about 2 minutes): see the PR description.
+1. **Dropbox app** (one time, about 2 minutes): see the PR description.
 
 ## Screenshot tune-up (next)
 

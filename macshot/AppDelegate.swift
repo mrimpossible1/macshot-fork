@@ -256,12 +256,12 @@ class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         // Prevent multiple instances — if already running, activate the existing one and quit
-        let bundleID = Bundle.main.bundleIdentifier ?? "com.sw33tlie.macshot.macshot"
+        let bundleID = Bundle.main.bundleIdentifier ?? "com.mrimpossible1.macshotty"
         let running = NSRunningApplication.runningApplications(withBundleIdentifier: bundleID)
         if running.count > 1 {
             // Tell the existing instance to show its icon and open Settings
             DistributedNotificationCenter.default().postNotificationName(
-                .init("com.sw33tlie.macshot.showAndOpenPrefs"),
+                .init("com.mrimpossible1.macshotty.showAndOpenPrefs"),
                 object: nil, userInfo: nil, deliverImmediately: true
             )
             NSApp.terminate(nil)
@@ -339,7 +339,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
         // Listen for duplicate-launch notification to restore icon
         DistributedNotificationCenter.default().addObserver(
             self, selector: #selector(handleShowAndOpenPrefs),
-            name: .init("com.sw33tlie.macshot.showAndOpenPrefs"), object: nil
+            name: .init("com.mrimpossible1.macshotty.showAndOpenPrefs"), object: nil
         )
 
         // Dismiss overlays when the user switches spaces
@@ -745,7 +745,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
         let symbolName = UserDefaults.standard.string(forKey: Self.statusBarIconSymbolNameKey) ?? ""
 
         if mode == "symbol", !symbolName.isEmpty,
-           let symbol = NSImage(systemSymbolName: symbolName, accessibilityDescription: "macshot") {
+           let symbol = NSImage(systemSymbolName: symbolName, accessibilityDescription: BuildVariant.displayName) {
             symbol.isTemplate = true
             symbol.size = NSSize(width: 22, height: 22)
             button.image = symbol
@@ -757,7 +757,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
             button.title = ""
         } else {
             button.image = nil
-            button.title = "macshot"
+            button.title = BuildVariant.displayName
         }
     }
 

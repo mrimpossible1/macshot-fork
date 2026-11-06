@@ -719,7 +719,7 @@ class SettingsWindowController: NSWindowController, NSToolbarDelegate, NSWindowD
     @objc private func revealSettingsFileClicked(_ sender: NSButton) {
         let prefsDir = FileManager.default.urls(for: .libraryDirectory, in: .userDomainMask).first!
             .appendingPathComponent("Preferences", isDirectory: true)
-        let bundleID = Bundle.main.bundleIdentifier ?? "com.sw33tlie.macshot.macshot"
+        let bundleID = Bundle.main.bundleIdentifier ?? "com.mrimpossible1.macshotty"
         let plist = prefsDir.appendingPathComponent("\(bundleID).plist")
         if FileManager.default.fileExists(atPath: plist.path) {
             NSWorkspace.shared.activateFileViewerSelecting([plist])
@@ -2339,7 +2339,7 @@ class SettingsWindowController: NSWindowController, NSToolbarDelegate, NSWindowD
                 var lines: [String] = []
                 let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "?"
                 let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "?"
-                lines.append("macshot \(version) (\(build))")
+                lines.append("MacShotty \(version) (\(build)), a fork of macshot")
                 lines.append("macOS \(ProcessInfo.processInfo.operatingSystemVersionString)")
                 lines.append("")
                 lines.append("=== NSScreen Info ===")
