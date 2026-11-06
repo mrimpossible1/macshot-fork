@@ -338,11 +338,27 @@
 "Google Drive (images + videos)" = "Google Drive (படங்கள் + காணொளிகள்)";
 "imgbb (images only)" = "imgbb (படங்கள் மட்டும்)";
 "S3-Compatible (images + videos)" = "S3-இணக்கமான (படங்கள் + காணொளிகள்)";
+"Dropbox (images + videos)" = "Dropbox (images + videos)";
+"Enter uploads the capture and copies the link" = "Enter uploads the capture and copies the link";
 "S3-Compatible Storage" = "S3-இணக்கமான சேமிப்பகம்";
 "Sign In with Google" = "Google மூலம் உள்நுழை";
 "Sign Out" = "வெளியேறு";
 "Signed in" = "உள்நுழைந்துள்ளீர்கள்";
 "Not signed in" = "உள்நுழையவில்லை";
+"Dropbox" = "Dropbox";
+"App Key:" = "App Key:";
+"App key from dropbox.com/developers/apps" = "App key from dropbox.com/developers/apps";
+"Add an App key first" = "Add an App key first";
+"Connect Dropbox" = "Connect Dropbox";
+"Connected" = "Connected";
+"Not connected" = "Not connected";
+"Disconnect" = "Disconnect";
+"Link:" = "Link:";
+"Public link (anyone with the link)" = "Public link (anyone with the link)";
+"Team-only link (Dropbox Business)" = "Team-only link (Dropbox Business)";
+"No link, just save the file" = "No link, just save the file";
+"Direct links (open the file itself, not the Dropbox page)" = "Direct links (open the file itself, not the Dropbox page)";
+"Captures are saved into this Dropbox folder (default /Share), which syncs to the Dropbox folder on your Mac, and the link is copied to your clipboard. Create a Dropbox app with Full Dropbox access and the files.content.write, files.content.read, sharing.write, sharing.read and account_info.read permissions, then paste its App key above." = "Captures are saved into this Dropbox folder (default /Share), which syncs to the Dropbox folder on your Mac, and the link is copied to your clipboard. Create a Dropbox app with Full Dropbox access and the files.content.write, files.content.read, sharing.write, sharing.read and account_info.read permissions, then paste its App key above.";
 "Account:" = "கணக்கு:";
 "Folder:" = "கோப்புறை:";
 "Test Connection" = "இணைப்பைச் சோதி";
@@ -368,6 +384,8 @@
 "Configure S3 in Preferences" = "விருப்பங்களில் S3 ஐ உள்ளமை";
 "Sign in to Google Drive in Preferences" = "விருப்பங்களில் Google Drive இல் உள்நுழை";
 "Video upload requires Google Drive or S3" = "காணொளி பதிவேற்றத்திற்கு Google Drive அல்லது S3 தேவை";
+"Video upload requires Google Drive, Dropbox or S3" = "Video upload requires Google Drive, Dropbox or S3";
+"Connect Dropbox in Settings" = "Connect Dropbox in Settings";
 
 /* Preferences - About */
 "macshot" = "macshot";
@@ -391,6 +409,7 @@
 "macshot needs microphone permission to record voice audio. Open System Settings to grant access." = "macshot குரல் ஒலியைப் பதிவு செய்ய ஒலிவாங்கி அனுமதி தேவை. அணுகலை வழங்க கணினி அமைப்புகளைத் திறக்கவும்.";
 "Upload to Google Drive?" = "Google Drive இல் பதிவேற்றவா?";
 "Upload to S3?" = "S3 இல் பதிவேற்றவா?";
+"Upload to Dropbox?" = "Upload to Dropbox?";
 "Upload to imgbb.com?" = "imgbb.com இல் பதிவேற்றவா?";
 "Your screenshot will be uploaded." = "உங்கள் திரைப்பிடிப்பு பதிவேற்றப்படும்.";
 

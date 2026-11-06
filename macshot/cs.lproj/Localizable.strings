@@ -340,11 +340,27 @@
 "Google Drive (images + videos)" = "Google Drive (obrázky + videa)";
 "imgbb (images only)" = "imgbb (pouze obrázky)";
 "S3-Compatible (images + videos)" = "S3-kompatibilní (obrázky + videa)";
+"Dropbox (images + videos)" = "Dropbox (images + videos)";
+"Enter uploads the capture and copies the link" = "Enter uploads the capture and copies the link";
 "S3-Compatible Storage" = "S3-kompatibilní úložiště";
 "Sign In with Google" = "Přihlásit se přes Google";
 "Sign Out" = "Odhlásit se";
 "Signed in" = "Přihlášen";
 "Not signed in" = "Nepřihlášen";
+"Dropbox" = "Dropbox";
+"App Key:" = "App Key:";
+"App key from dropbox.com/developers/apps" = "App key from dropbox.com/developers/apps";
+"Add an App key first" = "Add an App key first";
+"Connect Dropbox" = "Connect Dropbox";
+"Connected" = "Connected";
+"Not connected" = "Not connected";
+"Disconnect" = "Disconnect";
+"Link:" = "Link:";
+"Public link (anyone with the link)" = "Public link (anyone with the link)";
+"Team-only link (Dropbox Business)" = "Team-only link (Dropbox Business)";
+"No link, just save the file" = "No link, just save the file";
+"Direct links (open the file itself, not the Dropbox page)" = "Direct links (open the file itself, not the Dropbox page)";
+"Captures are saved into this Dropbox folder (default /Share), which syncs to the Dropbox folder on your Mac, and the link is copied to your clipboard. Create a Dropbox app with Full Dropbox access and the files.content.write, files.content.read, sharing.write, sharing.read and account_info.read permissions, then paste its App key above." = "Captures are saved into this Dropbox folder (default /Share), which syncs to the Dropbox folder on your Mac, and the link is copied to your clipboard. Create a Dropbox app with Full Dropbox access and the files.content.write, files.content.read, sharing.write, sharing.read and account_info.read permissions, then paste its App key above.";
 "Account:" = "Účet:";
 "Folder:" = "Složka:";
 "Test Connection" = "Test připojení";
@@ -370,6 +386,8 @@
 "Configure S3 in Preferences" = "Nastavit S3 v Předvolbách";
 "Sign in to Google Drive in Preferences" = "Přihlásit se ke Google Drive v Předvolbách";
 "Video upload requires Google Drive or S3" = "Nahrávání videa vyžaduje Google Drive nebo S3";
+"Video upload requires Google Drive, Dropbox or S3" = "Video upload requires Google Drive, Dropbox or S3";
+"Connect Dropbox in Settings" = "Connect Dropbox in Settings";
 
 /* Preferences - About */
 "macshot" = "macshot";
@@ -393,6 +411,7 @@
 "macshot needs microphone permission to record voice audio. Open System Settings to grant access." = "macshot potřebuje oprávnění k mikrofonu pro nahrávání hlasu. Otevřete Nastavení systému pro udělení přístupu.";
 "Upload to Google Drive?" = "Nahrát na Google Drive?";
 "Upload to S3?" = "Nahrát na S3?";
+"Upload to Dropbox?" = "Upload to Dropbox?";
 "Upload to imgbb.com?" = "Nahrát na imgbb.com?";
 "Your screenshot will be uploaded." = "Váš snímek bude nahrán.";
 

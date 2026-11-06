@@ -338,11 +338,27 @@
 "Google Drive (images + videos)" = "Google Drive (चित्र + वीडियो)";
 "imgbb (images only)" = "imgbb (केवल चित्र)";
 "S3-Compatible (images + videos)" = "S3-संगत (चित्र + वीडियो)";
+"Dropbox (images + videos)" = "Dropbox (images + videos)";
+"Enter uploads the capture and copies the link" = "Enter uploads the capture and copies the link";
 "S3-Compatible Storage" = "S3-संगत भंडारण";
 "Sign In with Google" = "Google से साइन इन करें";
 "Sign Out" = "साइन आउट";
 "Signed in" = "साइन इन किया हुआ";
 "Not signed in" = "साइन इन नहीं किया";
+"Dropbox" = "Dropbox";
+"App Key:" = "App Key:";
+"App key from dropbox.com/developers/apps" = "App key from dropbox.com/developers/apps";
+"Add an App key first" = "Add an App key first";
+"Connect Dropbox" = "Connect Dropbox";
+"Connected" = "Connected";
+"Not connected" = "Not connected";
+"Disconnect" = "Disconnect";
+"Link:" = "Link:";
+"Public link (anyone with the link)" = "Public link (anyone with the link)";
+"Team-only link (Dropbox Business)" = "Team-only link (Dropbox Business)";
+"No link, just save the file" = "No link, just save the file";
+"Direct links (open the file itself, not the Dropbox page)" = "Direct links (open the file itself, not the Dropbox page)";
+"Captures are saved into this Dropbox folder (default /Share), which syncs to the Dropbox folder on your Mac, and the link is copied to your clipboard. Create a Dropbox app with Full Dropbox access and the files.content.write, files.content.read, sharing.write, sharing.read and account_info.read permissions, then paste its App key above." = "Captures are saved into this Dropbox folder (default /Share), which syncs to the Dropbox folder on your Mac, and the link is copied to your clipboard. Create a Dropbox app with Full Dropbox access and the files.content.write, files.content.read, sharing.write, sharing.read and account_info.read permissions, then paste its App key above.";
 "Account:" = "खाता:";
 "Folder:" = "फ़ोल्डर:";
 "Test Connection" = "कनेक्शन परीक्षण";
@@ -370,6 +386,8 @@
 "Configure S3 in Preferences" = "प्राथमिकताओं में S3 कॉन्फ़िगर करें";
 "Sign in to Google Drive in Preferences" = "प्राथमिकताओं में Google Drive से साइन इन करें";
 "Video upload requires Google Drive or S3" = "वीडियो अपलोड के लिए Google Drive या S3 आवश्यक है";
+"Video upload requires Google Drive, Dropbox or S3" = "Video upload requires Google Drive, Dropbox or S3";
+"Connect Dropbox in Settings" = "Connect Dropbox in Settings";
 
 /* Preferences - About */
 "macshot" = "macshot";
@@ -393,6 +411,7 @@
 "macshot needs microphone permission to record voice audio. Open System Settings to grant access." = "macshot को ध्वनि ऑडियो रिकॉर्ड करने के लिए माइक्रोफ़ोन अनुमति चाहिए। पहुँच प्रदान करने के लिए सिस्टम सेटिंग्स खोलें।";
 "Upload to Google Drive?" = "Google Drive पर अपलोड करें?";
 "Upload to S3?" = "S3 पर अपलोड करें?";
+"Upload to Dropbox?" = "Upload to Dropbox?";
 "Upload to imgbb.com?" = "imgbb.com पर अपलोड करें?";
 "Your screenshot will be uploaded." = "आपका स्क्रीनशॉट अपलोड किया जाएगा।";
 

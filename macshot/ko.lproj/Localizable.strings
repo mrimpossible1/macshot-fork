@@ -322,11 +322,27 @@
 "Google Drive (images + videos)" = "Google Drive (이미지 + 동영상)";
 "imgbb (images only)" = "imgbb (이미지만)";
 "S3-Compatible (images + videos)" = "S3 호환 (이미지 + 동영상)";
+"Dropbox (images + videos)" = "Dropbox (images + videos)";
+"Enter uploads the capture and copies the link" = "Enter uploads the capture and copies the link";
 "S3-Compatible Storage" = "S3 호환 저장소";
 "Sign In with Google" = "Google로 로그인";
 "Sign Out" = "로그아웃";
 "Signed in" = "로그인됨";
 "Not signed in" = "로그인되지 않음";
+"Dropbox" = "Dropbox";
+"App Key:" = "App Key:";
+"App key from dropbox.com/developers/apps" = "App key from dropbox.com/developers/apps";
+"Add an App key first" = "Add an App key first";
+"Connect Dropbox" = "Connect Dropbox";
+"Connected" = "Connected";
+"Not connected" = "Not connected";
+"Disconnect" = "Disconnect";
+"Link:" = "Link:";
+"Public link (anyone with the link)" = "Public link (anyone with the link)";
+"Team-only link (Dropbox Business)" = "Team-only link (Dropbox Business)";
+"No link, just save the file" = "No link, just save the file";
+"Direct links (open the file itself, not the Dropbox page)" = "Direct links (open the file itself, not the Dropbox page)";
+"Captures are saved into this Dropbox folder (default /Share), which syncs to the Dropbox folder on your Mac, and the link is copied to your clipboard. Create a Dropbox app with Full Dropbox access and the files.content.write, files.content.read, sharing.write, sharing.read and account_info.read permissions, then paste its App key above." = "Captures are saved into this Dropbox folder (default /Share), which syncs to the Dropbox folder on your Mac, and the link is copied to your clipboard. Create a Dropbox app with Full Dropbox access and the files.content.write, files.content.read, sharing.write, sharing.read and account_info.read permissions, then paste its App key above.";
 "Account:" = "계정:";
 "Folder:" = "폴더:";
 "Test Connection" = "연결 테스트";
@@ -352,6 +368,8 @@
 "Configure S3 in Preferences" = "환경설정에서 S3 구성";
 "Sign in to Google Drive in Preferences" = "환경설정에서 Google Drive에 로그인";
 "Video upload requires Google Drive or S3" = "동영상 업로드에는 Google Drive 또는 S3가 필요합니다";
+"Video upload requires Google Drive, Dropbox or S3" = "Video upload requires Google Drive, Dropbox or S3";
+"Connect Dropbox in Settings" = "Connect Dropbox in Settings";
 
 /* Preferences - About */
 "macshot" = "macshot";
@@ -375,6 +393,7 @@
 "macshot needs microphone permission to record voice audio. Open System Settings to grant access." = "macshot이 음성을 녹음하려면 마이크 권한이 필요합니다. 시스템 설정을 열어 권한을 허용하세요.";
 "Upload to Google Drive?" = "Google Drive에 업로드하시겠습니까?";
 "Upload to S3?" = "S3에 업로드하시겠습니까?";
+"Upload to Dropbox?" = "Upload to Dropbox?";
 "Upload to imgbb.com?" = "imgbb.com에 업로드하시겠습니까?";
 "Your screenshot will be uploaded." = "스크린샷이 업로드됩니다.";
 

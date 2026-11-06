@@ -8382,6 +8382,7 @@ class OverlayView: NSView {
                 switch provider {
                 case "gdrive": title = L("Upload to Google Drive?")
                 case "s3": title = L("Upload to S3?")
+                case "dropbox": title = L("Upload to Dropbox?")
                 default: title = L("Upload to imgbb.com?")
                 }
                 let alert = NSAlert()
@@ -9448,6 +9449,13 @@ class OverlayView: NSView {
             }
         case 36, 76:  // Return / numpad Enter — quick capture (respects quickCaptureMode setting)
             if textEditView == nil, state == .selected {
+                #if !OFFLINE
+                // "Enter uploads" turns Return into capture → upload → link on the clipboard.
+                if !isEditorMode, UserDefaults.standard.bool(forKey: "quickCaptureUploads") {
+                    overlayDelegate?.overlayViewDidRequestUpload()
+                    break
+                }
+                #endif
                 overlayDelegate?.overlayViewDidRequestQuickSave()
             }
         case 51, 117:  // Backspace / Forward-Delete — remove selected annotation(s)

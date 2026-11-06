@@ -339,11 +339,27 @@
 "Google Drive (images + videos)" = "Google Drive（影像 + 影片）";
 "imgbb (images only)" = "imgbb（僅影像）";
 "S3-Compatible (images + videos)" = "S3 相容（影像 + 影片）";
+"Dropbox (images + videos)" = "Dropbox (images + videos)";
+"Enter uploads the capture and copies the link" = "Enter uploads the capture and copies the link";
 "S3-Compatible Storage" = "S3 相容儲存空間";
 "Sign In with Google" = "使用 Google 登入";
 "Sign Out" = "登出";
 "Signed in" = "已登入";
 "Not signed in" = "未登入";
+"Dropbox" = "Dropbox";
+"App Key:" = "App Key:";
+"App key from dropbox.com/developers/apps" = "App key from dropbox.com/developers/apps";
+"Add an App key first" = "Add an App key first";
+"Connect Dropbox" = "Connect Dropbox";
+"Connected" = "Connected";
+"Not connected" = "Not connected";
+"Disconnect" = "Disconnect";
+"Link:" = "Link:";
+"Public link (anyone with the link)" = "Public link (anyone with the link)";
+"Team-only link (Dropbox Business)" = "Team-only link (Dropbox Business)";
+"No link, just save the file" = "No link, just save the file";
+"Direct links (open the file itself, not the Dropbox page)" = "Direct links (open the file itself, not the Dropbox page)";
+"Captures are saved into this Dropbox folder (default /Share), which syncs to the Dropbox folder on your Mac, and the link is copied to your clipboard. Create a Dropbox app with Full Dropbox access and the files.content.write, files.content.read, sharing.write, sharing.read and account_info.read permissions, then paste its App key above." = "Captures are saved into this Dropbox folder (default /Share), which syncs to the Dropbox folder on your Mac, and the link is copied to your clipboard. Create a Dropbox app with Full Dropbox access and the files.content.write, files.content.read, sharing.write, sharing.read and account_info.read permissions, then paste its App key above.";
 "Account:" = "帳號：";
 "Folder:" = "資料夾：";
 "Test Connection" = "測試連線";
@@ -369,6 +385,8 @@
 "Configure S3 in Preferences" = "在偏好設定中設定 S3";
 "Sign in to Google Drive in Preferences" = "在偏好設定中登入 Google Drive";
 "Video upload requires Google Drive or S3" = "影片上傳需要 Google Drive 或 S3";
+"Video upload requires Google Drive, Dropbox or S3" = "Video upload requires Google Drive, Dropbox or S3";
+"Connect Dropbox in Settings" = "Connect Dropbox in Settings";
 
 /* Preferences - About */
 "macshot" = "macshot";
@@ -392,6 +410,7 @@
 "macshot needs microphone permission to record voice audio. Open System Settings to grant access." = "macshot 需要麥克風權限才能錄製語音。請打開系統設定以授予權限。";
 "Upload to Google Drive?" = "上傳至 Google Drive？";
 "Upload to S3?" = "上傳至 S3？";
+"Upload to Dropbox?" = "Upload to Dropbox?";
 "Upload to imgbb.com?" = "上傳至 imgbb.com？";
 "Your screenshot will be uploaded." = "您的螢幕截圖將被上傳。";
 

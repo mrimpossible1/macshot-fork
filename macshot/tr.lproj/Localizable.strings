@@ -333,11 +333,27 @@
 "Google Drive (images + videos)" = "Google Drive (görseller + videolar)";
 "imgbb (images only)" = "imgbb (yalnızca görseller)";
 "S3-Compatible (images + videos)" = "S3 Uyumlu (görseller + videolar)";
+"Dropbox (images + videos)" = "Dropbox (images + videos)";
+"Enter uploads the capture and copies the link" = "Enter uploads the capture and copies the link";
 "S3-Compatible Storage" = "S3 Uyumlu Depolama";
 "Sign In with Google" = "Google ile Giriş Yap";
 "Sign Out" = "Çıkış Yap";
 "Signed in" = "Giriş yapıldı";
 "Not signed in" = "Giriş yapılmadı";
+"Dropbox" = "Dropbox";
+"App Key:" = "App Key:";
+"App key from dropbox.com/developers/apps" = "App key from dropbox.com/developers/apps";
+"Add an App key first" = "Add an App key first";
+"Connect Dropbox" = "Connect Dropbox";
+"Connected" = "Connected";
+"Not connected" = "Not connected";
+"Disconnect" = "Disconnect";
+"Link:" = "Link:";
+"Public link (anyone with the link)" = "Public link (anyone with the link)";
+"Team-only link (Dropbox Business)" = "Team-only link (Dropbox Business)";
+"No link, just save the file" = "No link, just save the file";
+"Direct links (open the file itself, not the Dropbox page)" = "Direct links (open the file itself, not the Dropbox page)";
+"Captures are saved into this Dropbox folder (default /Share), which syncs to the Dropbox folder on your Mac, and the link is copied to your clipboard. Create a Dropbox app with Full Dropbox access and the files.content.write, files.content.read, sharing.write, sharing.read and account_info.read permissions, then paste its App key above." = "Captures are saved into this Dropbox folder (default /Share), which syncs to the Dropbox folder on your Mac, and the link is copied to your clipboard. Create a Dropbox app with Full Dropbox access and the files.content.write, files.content.read, sharing.write, sharing.read and account_info.read permissions, then paste its App key above.";
 "Account:" = "Hesap:";
 "Folder:" = "Klasör:";
 "Test Connection" = "Bağlantıyı Test Et";
@@ -363,6 +379,8 @@
 "Configure S3 in Preferences" = "Tercihlerde S3'ü yapılandırın";
 "Sign in to Google Drive in Preferences" = "Tercihlerde Google Drive'a giriş yapın";
 "Video upload requires Google Drive or S3" = "Video yüklemek için Google Drive veya S3 gereklidir";
+"Video upload requires Google Drive, Dropbox or S3" = "Video upload requires Google Drive, Dropbox or S3";
+"Connect Dropbox in Settings" = "Connect Dropbox in Settings";
 
 /* Preferences - About */
 "macshot" = "macshot";
@@ -386,6 +404,7 @@
 "macshot needs microphone permission to record voice audio. Open System Settings to grant access." = "macshot, ses kaydetmek için mikrofon iznine ihtiyaç duyar. İzin vermek için Sistem Ayarları'nı açın.";
 "Upload to Google Drive?" = "Google Drive'a yüklensin mi?";
 "Upload to S3?" = "S3'e yüklensin mi?";
+"Upload to Dropbox?" = "Upload to Dropbox?";
 "Upload to imgbb.com?" = "imgbb.com'a yüklensin mi?";
 "Your screenshot will be uploaded." = "Ekran görüntünüz yüklenecek.";
 

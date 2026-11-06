@@ -339,11 +339,27 @@
 "Google Drive (images + videos)" = "Google Drive (รูปภาพ + วิดีโอ)";
 "imgbb (images only)" = "imgbb (รูปภาพเท่านั้น)";
 "S3-Compatible (images + videos)" = "S3-Compatible (รูปภาพ + วิดีโอ)";
+"Dropbox (images + videos)" = "Dropbox (images + videos)";
+"Enter uploads the capture and copies the link" = "Enter uploads the capture and copies the link";
 "S3-Compatible Storage" = "พื้นที่จัดเก็บ S3-Compatible";
 "Sign In with Google" = "ลงชื่อเข้าใช้ด้วย Google";
 "Sign Out" = "ออกจากระบบ";
 "Signed in" = "เข้าสู่ระบบแล้ว";
 "Not signed in" = "ยังไม่ได้เข้าสู่ระบบ";
+"Dropbox" = "Dropbox";
+"App Key:" = "App Key:";
+"App key from dropbox.com/developers/apps" = "App key from dropbox.com/developers/apps";
+"Add an App key first" = "Add an App key first";
+"Connect Dropbox" = "Connect Dropbox";
+"Connected" = "Connected";
+"Not connected" = "Not connected";
+"Disconnect" = "Disconnect";
+"Link:" = "Link:";
+"Public link (anyone with the link)" = "Public link (anyone with the link)";
+"Team-only link (Dropbox Business)" = "Team-only link (Dropbox Business)";
+"No link, just save the file" = "No link, just save the file";
+"Direct links (open the file itself, not the Dropbox page)" = "Direct links (open the file itself, not the Dropbox page)";
+"Captures are saved into this Dropbox folder (default /Share), which syncs to the Dropbox folder on your Mac, and the link is copied to your clipboard. Create a Dropbox app with Full Dropbox access and the files.content.write, files.content.read, sharing.write, sharing.read and account_info.read permissions, then paste its App key above." = "Captures are saved into this Dropbox folder (default /Share), which syncs to the Dropbox folder on your Mac, and the link is copied to your clipboard. Create a Dropbox app with Full Dropbox access and the files.content.write, files.content.read, sharing.write, sharing.read and account_info.read permissions, then paste its App key above.";
 "Account:" = "บัญชี:";
 "Folder:" = "โฟลเดอร์:";
 "Test Connection" = "ทดสอบการเชื่อมต่อ";
@@ -369,6 +385,8 @@
 "Configure S3 in Preferences" = "ตั้งค่า S3 ในการตั้งค่า";
 "Sign in to Google Drive in Preferences" = "ลงชื่อเข้าใช้ Google Drive ในการตั้งค่า";
 "Video upload requires Google Drive or S3" = "การอัปโหลดวิดีโอต้องใช้ Google Drive หรือ S3";
+"Video upload requires Google Drive, Dropbox or S3" = "Video upload requires Google Drive, Dropbox or S3";
+"Connect Dropbox in Settings" = "Connect Dropbox in Settings";
 
 /* Preferences - About */
 "macshot" = "macshot";
@@ -392,6 +410,7 @@
 "macshot needs microphone permission to record voice audio. Open System Settings to grant access." = "macshot ต้องการสิทธิ์ไมโครโฟนเพื่อบันทึกเสียง เปิดการตั้งค่าระบบเพื่ออนุญาต";
 "Upload to Google Drive?" = "อัปโหลดไปยัง Google Drive?";
 "Upload to S3?" = "อัปโหลดไปยัง S3?";
+"Upload to Dropbox?" = "Upload to Dropbox?";
 "Upload to imgbb.com?" = "อัปโหลดไปยัง imgbb.com?";
 "Your screenshot will be uploaded." = "ภาพหน้าจอของคุณจะถูกอัปโหลด";
 

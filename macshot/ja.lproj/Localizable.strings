@@ -322,11 +322,27 @@
 "Google Drive (images + videos)" = "Google Drive (画像 + 動画)";
 "imgbb (images only)" = "imgbb (画像のみ)";
 "S3-Compatible (images + videos)" = "S3 互換 (画像 + 動画)";
+"Dropbox (images + videos)" = "Dropbox (images + videos)";
+"Enter uploads the capture and copies the link" = "Enter uploads the capture and copies the link";
 "S3-Compatible Storage" = "S3 互換ストレージ";
 "Sign In with Google" = "Google でサインイン";
 "Sign Out" = "サインアウト";
 "Signed in" = "サインイン済み";
 "Not signed in" = "未サインイン";
+"Dropbox" = "Dropbox";
+"App Key:" = "App Key:";
+"App key from dropbox.com/developers/apps" = "App key from dropbox.com/developers/apps";
+"Add an App key first" = "Add an App key first";
+"Connect Dropbox" = "Connect Dropbox";
+"Connected" = "Connected";
+"Not connected" = "Not connected";
+"Disconnect" = "Disconnect";
+"Link:" = "Link:";
+"Public link (anyone with the link)" = "Public link (anyone with the link)";
+"Team-only link (Dropbox Business)" = "Team-only link (Dropbox Business)";
+"No link, just save the file" = "No link, just save the file";
+"Direct links (open the file itself, not the Dropbox page)" = "Direct links (open the file itself, not the Dropbox page)";
+"Captures are saved into this Dropbox folder (default /Share), which syncs to the Dropbox folder on your Mac, and the link is copied to your clipboard. Create a Dropbox app with Full Dropbox access and the files.content.write, files.content.read, sharing.write, sharing.read and account_info.read permissions, then paste its App key above." = "Captures are saved into this Dropbox folder (default /Share), which syncs to the Dropbox folder on your Mac, and the link is copied to your clipboard. Create a Dropbox app with Full Dropbox access and the files.content.write, files.content.read, sharing.write, sharing.read and account_info.read permissions, then paste its App key above.";
 "Account:" = "アカウント:";
 "Folder:" = "フォルダ:";
 "Test Connection" = "接続テスト";
@@ -352,6 +368,8 @@
 "Configure S3 in Preferences" = "環境設定で S3 を設定してください";
 "Sign in to Google Drive in Preferences" = "環境設定で Google Drive にサインインしてください";
 "Video upload requires Google Drive or S3" = "動画のアップロードには Google Drive または S3 が必要です";
+"Video upload requires Google Drive, Dropbox or S3" = "Video upload requires Google Drive, Dropbox or S3";
+"Connect Dropbox in Settings" = "Connect Dropbox in Settings";
 
 /* Preferences - About */
 "macshot" = "macshot";
@@ -375,6 +393,7 @@
 "macshot needs microphone permission to record voice audio. Open System Settings to grant access." = "macshot が音声を録音するには、マイクの許可が必要です。システム設定を開いてアクセスを許可してください。";
 "Upload to Google Drive?" = "Google Drive にアップロードしますか?";
 "Upload to S3?" = "S3 にアップロードしますか?";
+"Upload to Dropbox?" = "Upload to Dropbox?";
 "Upload to imgbb.com?" = "imgbb.com にアップロードしますか?";
 "Your screenshot will be uploaded." = "スクリーンショットがアップロードされます。";
 

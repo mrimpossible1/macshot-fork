@@ -333,11 +333,27 @@
 "Google Drive (images + videos)" = "Google Drive (imagini + videoclipuri)";
 "imgbb (images only)" = "imgbb (doar imagini)";
 "S3-Compatible (images + videos)" = "S3-Compatible (imagini + videoclipuri)";
+"Dropbox (images + videos)" = "Dropbox (images + videos)";
+"Enter uploads the capture and copies the link" = "Enter uploads the capture and copies the link";
 "S3-Compatible Storage" = "S3-Compatible Storage";
 "Sign In with Google" = "Autentificare cu Google";
 "Sign Out" = "Deconectare";
 "Signed in" = "Conectat";
 "Not signed in" = "Neconectat";
+"Dropbox" = "Dropbox";
+"App Key:" = "App Key:";
+"App key from dropbox.com/developers/apps" = "App key from dropbox.com/developers/apps";
+"Add an App key first" = "Add an App key first";
+"Connect Dropbox" = "Connect Dropbox";
+"Connected" = "Connected";
+"Not connected" = "Not connected";
+"Disconnect" = "Disconnect";
+"Link:" = "Link:";
+"Public link (anyone with the link)" = "Public link (anyone with the link)";
+"Team-only link (Dropbox Business)" = "Team-only link (Dropbox Business)";
+"No link, just save the file" = "No link, just save the file";
+"Direct links (open the file itself, not the Dropbox page)" = "Direct links (open the file itself, not the Dropbox page)";
+"Captures are saved into this Dropbox folder (default /Share), which syncs to the Dropbox folder on your Mac, and the link is copied to your clipboard. Create a Dropbox app with Full Dropbox access and the files.content.write, files.content.read, sharing.write, sharing.read and account_info.read permissions, then paste its App key above." = "Captures are saved into this Dropbox folder (default /Share), which syncs to the Dropbox folder on your Mac, and the link is copied to your clipboard. Create a Dropbox app with Full Dropbox access and the files.content.write, files.content.read, sharing.write, sharing.read and account_info.read permissions, then paste its App key above.";
 "Account:" = "Cont:";
 "Folder:" = "Folder:";
 "Test Connection" = "Testează conexiunea";
@@ -363,6 +379,8 @@
 "Configure S3 in Preferences" = "Configurează S3 în Preferințe";
 "Sign in to Google Drive in Preferences" = "Autentifică-te în Google Drive din Preferințe";
 "Video upload requires Google Drive or S3" = "Încărcarea video necesită Google Drive sau S3";
+"Video upload requires Google Drive, Dropbox or S3" = "Video upload requires Google Drive, Dropbox or S3";
+"Connect Dropbox in Settings" = "Connect Dropbox in Settings";
 
 /* Preferences - About */
 "macshot" = "macshot";
@@ -386,6 +404,7 @@
 "macshot needs microphone permission to record voice audio. Open System Settings to grant access." = "macshot are nevoie de permisiunea microfonului pentru a înregistra audio vocal. Deschide Setările sistemului pentru a acorda acces.";
 "Upload to Google Drive?" = "Încarcă pe Google Drive?";
 "Upload to S3?" = "Încarcă pe S3?";
+"Upload to Dropbox?" = "Upload to Dropbox?";
 "Upload to imgbb.com?" = "Încarcă pe imgbb.com?";
 "Your screenshot will be uploaded." = "Captura ta de ecran va fi încărcată.";
 

@@ -339,11 +339,27 @@
 "Google Drive (images + videos)" = "Google Drive (ảnh + video)";
 "imgbb (images only)" = "imgbb (chỉ ảnh)";
 "S3-Compatible (images + videos)" = "S3-Compatible (ảnh + video)";
+"Dropbox (images + videos)" = "Dropbox (images + videos)";
+"Enter uploads the capture and copies the link" = "Enter uploads the capture and copies the link";
 "S3-Compatible Storage" = "Lưu trữ tương thích S3";
 "Sign In with Google" = "Đăng nhập bằng Google";
 "Sign Out" = "Đăng xuất";
 "Signed in" = "Đã đăng nhập";
 "Not signed in" = "Chưa đăng nhập";
+"Dropbox" = "Dropbox";
+"App Key:" = "App Key:";
+"App key from dropbox.com/developers/apps" = "App key from dropbox.com/developers/apps";
+"Add an App key first" = "Add an App key first";
+"Connect Dropbox" = "Connect Dropbox";
+"Connected" = "Connected";
+"Not connected" = "Not connected";
+"Disconnect" = "Disconnect";
+"Link:" = "Link:";
+"Public link (anyone with the link)" = "Public link (anyone with the link)";
+"Team-only link (Dropbox Business)" = "Team-only link (Dropbox Business)";
+"No link, just save the file" = "No link, just save the file";
+"Direct links (open the file itself, not the Dropbox page)" = "Direct links (open the file itself, not the Dropbox page)";
+"Captures are saved into this Dropbox folder (default /Share), which syncs to the Dropbox folder on your Mac, and the link is copied to your clipboard. Create a Dropbox app with Full Dropbox access and the files.content.write, files.content.read, sharing.write, sharing.read and account_info.read permissions, then paste its App key above." = "Captures are saved into this Dropbox folder (default /Share), which syncs to the Dropbox folder on your Mac, and the link is copied to your clipboard. Create a Dropbox app with Full Dropbox access and the files.content.write, files.content.read, sharing.write, sharing.read and account_info.read permissions, then paste its App key above.";
 "Account:" = "Tài khoản:";
 "Folder:" = "Thư mục:";
 "Test Connection" = "Kiểm tra kết nối";
@@ -369,6 +385,8 @@
 "Configure S3 in Preferences" = "Cấu hình S3 trong Tùy chọn";
 "Sign in to Google Drive in Preferences" = "Đăng nhập Google Drive trong Tùy chọn";
 "Video upload requires Google Drive or S3" = "Tải video lên yêu cầu Google Drive hoặc S3";
+"Video upload requires Google Drive, Dropbox or S3" = "Video upload requires Google Drive, Dropbox or S3";
+"Connect Dropbox in Settings" = "Connect Dropbox in Settings";
 
 /* Preferences - About */
 "macshot" = "macshot";
@@ -392,6 +410,7 @@
 "macshot needs microphone permission to record voice audio. Open System Settings to grant access." = "macshot cần quyền micro để ghi âm giọng nói. Mở Cài đặt hệ thống để cấp quyền.";
 "Upload to Google Drive?" = "Tải lên Google Drive?";
 "Upload to S3?" = "Tải lên S3?";
+"Upload to Dropbox?" = "Upload to Dropbox?";
 "Upload to imgbb.com?" = "Tải lên imgbb.com?";
 "Your screenshot will be uploaded." = "Ảnh chụp của bạn sẽ được tải lên.";
 

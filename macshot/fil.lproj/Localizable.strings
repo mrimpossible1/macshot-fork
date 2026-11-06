@@ -340,11 +340,27 @@
 "Google Drive (images + videos)" = "Google Drive (mga larawan + video)";
 "imgbb (images only)" = "imgbb (mga larawan lamang)";
 "S3-Compatible (images + videos)" = "S3-Compatible (mga larawan + video)";
+"Dropbox (images + videos)" = "Dropbox (images + videos)";
+"Enter uploads the capture and copies the link" = "Enter uploads the capture and copies the link";
 "S3-Compatible Storage" = "S3-Compatible Storage";
 "Sign In with Google" = "Mag-sign In gamit ang Google";
 "Sign Out" = "Mag-sign Out";
 "Signed in" = "Naka-sign in";
 "Not signed in" = "Hindi naka-sign in";
+"Dropbox" = "Dropbox";
+"App Key:" = "App Key:";
+"App key from dropbox.com/developers/apps" = "App key from dropbox.com/developers/apps";
+"Add an App key first" = "Add an App key first";
+"Connect Dropbox" = "Connect Dropbox";
+"Connected" = "Connected";
+"Not connected" = "Not connected";
+"Disconnect" = "Disconnect";
+"Link:" = "Link:";
+"Public link (anyone with the link)" = "Public link (anyone with the link)";
+"Team-only link (Dropbox Business)" = "Team-only link (Dropbox Business)";
+"No link, just save the file" = "No link, just save the file";
+"Direct links (open the file itself, not the Dropbox page)" = "Direct links (open the file itself, not the Dropbox page)";
+"Captures are saved into this Dropbox folder (default /Share), which syncs to the Dropbox folder on your Mac, and the link is copied to your clipboard. Create a Dropbox app with Full Dropbox access and the files.content.write, files.content.read, sharing.write, sharing.read and account_info.read permissions, then paste its App key above." = "Captures are saved into this Dropbox folder (default /Share), which syncs to the Dropbox folder on your Mac, and the link is copied to your clipboard. Create a Dropbox app with Full Dropbox access and the files.content.write, files.content.read, sharing.write, sharing.read and account_info.read permissions, then paste its App key above.";
 "Account:" = "Account:";
 "Folder:" = "Folder:";
 "Test Connection" = "Subukan ang Koneksyon";
@@ -370,6 +386,8 @@
 "Configure S3 in Preferences" = "I-configure ang S3 sa Mga Kagustuhan";
 "Sign in to Google Drive in Preferences" = "Mag-sign in sa Google Drive sa Mga Kagustuhan";
 "Video upload requires Google Drive or S3" = "Ang pag-upload ng video ay nangangailangan ng Google Drive o S3";
+"Video upload requires Google Drive, Dropbox or S3" = "Video upload requires Google Drive, Dropbox or S3";
+"Connect Dropbox in Settings" = "Connect Dropbox in Settings";
 
 /* Preferences - About */
 "macshot" = "macshot";
@@ -393,6 +411,7 @@
 "macshot needs microphone permission to record voice audio. Open System Settings to grant access." = "Kailangan ng macshot ang microphone permission upang mag-record ng boses. Buksan ang System Settings upang bigyan ng access.";
 "Upload to Google Drive?" = "I-upload sa Google Drive?";
 "Upload to S3?" = "I-upload sa S3?";
+"Upload to Dropbox?" = "Upload to Dropbox?";
 "Upload to imgbb.com?" = "I-upload sa imgbb.com?";
 "Your screenshot will be uploaded." = "Ia-upload ang iyong screenshot.";
 

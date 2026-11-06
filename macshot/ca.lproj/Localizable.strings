@@ -333,11 +333,27 @@
 "Google Drive (images + videos)" = "Google Drive (imatges + vídeos)";
 "imgbb (images only)" = "imgbb (només imatges)";
 "S3-Compatible (images + videos)" = "S3-Compatible (imatges + vídeos)";
+"Dropbox (images + videos)" = "Dropbox (images + videos)";
+"Enter uploads the capture and copies the link" = "Enter uploads the capture and copies the link";
 "S3-Compatible Storage" = "Emmagatzematge S3-Compatible";
 "Sign In with Google" = "Iniciar sessió amb Google";
 "Sign Out" = "Tancar sessió";
 "Signed in" = "Sessió iniciada";
 "Not signed in" = "Sessió no iniciada";
+"Dropbox" = "Dropbox";
+"App Key:" = "App Key:";
+"App key from dropbox.com/developers/apps" = "App key from dropbox.com/developers/apps";
+"Add an App key first" = "Add an App key first";
+"Connect Dropbox" = "Connect Dropbox";
+"Connected" = "Connected";
+"Not connected" = "Not connected";
+"Disconnect" = "Disconnect";
+"Link:" = "Link:";
+"Public link (anyone with the link)" = "Public link (anyone with the link)";
+"Team-only link (Dropbox Business)" = "Team-only link (Dropbox Business)";
+"No link, just save the file" = "No link, just save the file";
+"Direct links (open the file itself, not the Dropbox page)" = "Direct links (open the file itself, not the Dropbox page)";
+"Captures are saved into this Dropbox folder (default /Share), which syncs to the Dropbox folder on your Mac, and the link is copied to your clipboard. Create a Dropbox app with Full Dropbox access and the files.content.write, files.content.read, sharing.write, sharing.read and account_info.read permissions, then paste its App key above." = "Captures are saved into this Dropbox folder (default /Share), which syncs to the Dropbox folder on your Mac, and the link is copied to your clipboard. Create a Dropbox app with Full Dropbox access and the files.content.write, files.content.read, sharing.write, sharing.read and account_info.read permissions, then paste its App key above.";
 "Account:" = "Compte:";
 "Folder:" = "Carpeta:";
 "Test Connection" = "Provar connexió";
@@ -363,6 +379,8 @@
 "Configure S3 in Preferences" = "Configurar S3 a les Preferències";
 "Sign in to Google Drive in Preferences" = "Iniciar sessió a Google Drive a les Preferències";
 "Video upload requires Google Drive or S3" = "La pujada de vídeo requereix Google Drive o S3";
+"Video upload requires Google Drive, Dropbox or S3" = "Video upload requires Google Drive, Dropbox or S3";
+"Connect Dropbox in Settings" = "Connect Dropbox in Settings";
 
 /* Preferences - About */
 "macshot" = "macshot";
@@ -386,6 +404,7 @@
 "macshot needs microphone permission to record voice audio. Open System Settings to grant access." = "macshot necessita permís de micròfon per gravar àudio de veu. Obriu la Configuració del sistema per concedir l'accés.";
 "Upload to Google Drive?" = "Pujar a Google Drive?";
 "Upload to S3?" = "Pujar a S3?";
+"Upload to Dropbox?" = "Upload to Dropbox?";
 "Upload to imgbb.com?" = "Pujar a imgbb.com?";
 "Your screenshot will be uploaded." = "La vostra captura de pantalla es pujarà.";
 

@@ -340,11 +340,27 @@
 "Google Drive (images + videos)" = "Google Drive (зображення + відео)";
 "imgbb (images only)" = "imgbb (лише зображення)";
 "S3-Compatible (images + videos)" = "S3-сумісне (зображення + відео)";
+"Dropbox (images + videos)" = "Dropbox (images + videos)";
+"Enter uploads the capture and copies the link" = "Enter uploads the capture and copies the link";
 "S3-Compatible Storage" = "S3-сумісне сховище";
 "Sign In with Google" = "Увійти через Google";
 "Sign Out" = "Вийти";
 "Signed in" = "Увійдено";
 "Not signed in" = "Не увійдено";
+"Dropbox" = "Dropbox";
+"App Key:" = "App Key:";
+"App key from dropbox.com/developers/apps" = "App key from dropbox.com/developers/apps";
+"Add an App key first" = "Add an App key first";
+"Connect Dropbox" = "Connect Dropbox";
+"Connected" = "Connected";
+"Not connected" = "Not connected";
+"Disconnect" = "Disconnect";
+"Link:" = "Link:";
+"Public link (anyone with the link)" = "Public link (anyone with the link)";
+"Team-only link (Dropbox Business)" = "Team-only link (Dropbox Business)";
+"No link, just save the file" = "No link, just save the file";
+"Direct links (open the file itself, not the Dropbox page)" = "Direct links (open the file itself, not the Dropbox page)";
+"Captures are saved into this Dropbox folder (default /Share), which syncs to the Dropbox folder on your Mac, and the link is copied to your clipboard. Create a Dropbox app with Full Dropbox access and the files.content.write, files.content.read, sharing.write, sharing.read and account_info.read permissions, then paste its App key above." = "Captures are saved into this Dropbox folder (default /Share), which syncs to the Dropbox folder on your Mac, and the link is copied to your clipboard. Create a Dropbox app with Full Dropbox access and the files.content.write, files.content.read, sharing.write, sharing.read and account_info.read permissions, then paste its App key above.";
 "Account:" = "Обліковий запис:";
 "Folder:" = "Папка:";
 "Test Connection" = "Перевірити з'єднання";
@@ -370,6 +386,8 @@
 "Configure S3 in Preferences" = "Налаштуйте S3 у Параметрах";
 "Sign in to Google Drive in Preferences" = "Увійдіть до Google Drive у Параметрах";
 "Video upload requires Google Drive or S3" = "Завантаження відео потребує Google Drive або S3";
+"Video upload requires Google Drive, Dropbox or S3" = "Video upload requires Google Drive, Dropbox or S3";
+"Connect Dropbox in Settings" = "Connect Dropbox in Settings";
 
 /* Preferences - About */
 "macshot" = "macshot";
@@ -393,6 +411,7 @@
 "macshot needs microphone permission to record voice audio. Open System Settings to grant access." = "macshot потребує дозволу мікрофона для запису голосового аудіо. Відкрийте Системні параметри, щоб надати доступ.";
 "Upload to Google Drive?" = "Завантажити на Google Drive?";
 "Upload to S3?" = "Завантажити на S3?";
+"Upload to Dropbox?" = "Upload to Dropbox?";
 "Upload to imgbb.com?" = "Завантажити на imgbb.com?";
 "Your screenshot will be uploaded." = "Ваш знімок екрана буде завантажено.";
 

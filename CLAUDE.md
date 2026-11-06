@@ -84,6 +84,7 @@ macshot/
 │   ├── UploadPayload.swift             # Streamed upload bodies (chunking, incremental SHA256, multipart on disk)
 │   ├── ImgbbUploader.swift             # imgbb image upload
 │   ├── GoogleDriveUploader.swift       # Google Drive OAuth2 upload
+│   ├── DropboxUploader.swift           # Dropbox OAuth2 (PKCE) upload to /Share + share links
 │   └── S3Uploader.swift               # S3-compatible upload
 │
 ├── UI/
@@ -264,7 +265,8 @@ The video editor is built around `VideoEditorDocument` (one `VideoProject`: time
 - Tools: `enabledTools`, `knownToolRawValues`
 - Features: `imgbbAPIKey`, `beautifyEnabled`, `beautifyStyleIndex`, `beautifyMode`, `beautifyPadding`, `beautifyCornerRadius`, `beautifyShadowRadius`, `pencilSmoothEnabled`, `loupeSize`, `stampSize`, `translateTargetLang`
 - Styles: `currentLineStyle`, `currentArrowStyle`, `currentRectFillStyle`, `currentRectCornerRadius`
-- Upload: `uploadProvider` (imgbb/gdrive), `googleDriveRefreshToken`, `gdriveFolderName` (Drive destination folder, defaults to "macshot"), `uploadConfirmEnabled`
+- Upload: `uploadProvider` (imgbb/gdrive/s3/dropbox), `googleDriveRefreshToken`, `gdriveFolderName` (Drive destination folder, defaults to "macshot"), `uploadConfirmEnabled`
+- Dropbox: `dropboxAppKey` (user's own Dropbox app, PKCE), `dropboxFolder` (default `/Share`), `dropboxLinkAudience` (public/team/none), `dropboxDirectLinks`; tokens in `dropbox_tokens.json` beside the Drive tokens. `quickCaptureUploads` makes Return upload and copy the link.
 
 ### Threading Model
 - **Capture:** Displays are captured one at a time, the one under the pointer first (on macOS 26 `replayd` serializes concurrent screenshot requests and charges far more per queued request). Each display's overlay is shown as soon as its capture lands; keyboard focus stays on the display with a selection, else the one under the pointer, and a partial failure falls back only for the displays not yet shown.
