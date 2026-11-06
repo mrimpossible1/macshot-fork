@@ -367,7 +367,8 @@
 					ScreenCaptureKit,
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.mrimpossible1.macshotty;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_MODULE_NAME = macshot;
+				PRODUCT_NAME = MacShotty;
 				REGISTER_APP_GROUPS = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -405,7 +406,8 @@
 					ScreenCaptureKit,
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.mrimpossible1.macshotty;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_MODULE_NAME = macshot;
+				PRODUCT_NAME = MacShotty;
 				REGISTER_APP_GROUPS = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
