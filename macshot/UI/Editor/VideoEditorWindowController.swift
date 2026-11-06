@@ -218,6 +218,11 @@ final class VideoEditorWindowController: NSWindowController, NSWindowDelegate {
         refreshChrome()
         timeChanged(0)
         DispatchQueue.main.async { [weak self] in self?.layoutTimeline() }
+        // Like Screen Studio: a fresh recording opens with zooms already placed.
+        if editorDocument.isNewProject, editorDocument.hasPointerData, editorDocument.project.zooms.isEmpty,
+           Self.autoZoomNewRecordings {
+            DispatchQueue.main.async { [weak self] in self?.autoZoom(quiet: true) }
+        }
     }
 
     private func layoutTimeline() {
@@ -327,6 +332,11 @@ final class VideoEditorWindowController: NSWindowController, NSWindowDelegate {
         guard let raw = sender.selectedItem?.representedObject as? String, let aspect = VideoAspectRatio(rawValue: raw) else { return }
         editorDocument.edit([.render]) { $0.look.frame.aspect = aspect }
         editorDocument.rememberLook()
+        stage.needsLayout = true
+    }
+
+    /// A saved look preset replaced the whole look, aspect ratio included.
+    func lookPresetApplied() {
         stage.needsLayout = true
     }
 
@@ -470,7 +480,12 @@ final class VideoEditorWindowController: NSWindowController, NSWindowDelegate {
         playback.seek(toSource: start + 0.3)
     }
 
-    func autoZoom() {
+    static let autoZoomNewRecordingsKey = "videoAutoZoomNewRecordings"
+    static var autoZoomNewRecordings: Bool {
+        UserDefaults.standard.object(forKey: autoZoomNewRecordingsKey) as? Bool ?? true
+    }
+
+    func autoZoom(quiet: Bool = false) {
         guard let recording = editorDocument.recording else { return }
         let p = editorDocument.project
         let manual = p.zooms.filter { !$0.isAutomatic }.map { $0.startTime...$0.endTime }
@@ -478,7 +493,7 @@ final class VideoEditorWindowController: NSWindowController, NSWindowDelegate {
         let suggestions = AutoZoomPlanner.suggestions(recording: recording, track: track, range: p.trimStart...p.trimEnd,
                                                       level: CGFloat(p.look.zoom.defaultLevel), avoiding: manual)
         guard !suggestions.isEmpty else {
-            showStatus(L("No clicks or typing found to zoom into"), isError: true)
+            if !quiet { showStatus(L("No clicks or typing found to zoom into"), isError: true) }
             return
         }
         let transition = p.look.zoom.transition.duration

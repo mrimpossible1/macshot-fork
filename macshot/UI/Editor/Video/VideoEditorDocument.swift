@@ -77,6 +77,8 @@ final class VideoEditorDocument {
     private static let saveQueue = DispatchQueue(label: "macshot.video-project-save", qos: .utility)
     /// Revision bumps on every change; exports and caches key off it.
     private(set) var revision: UInt64 = 0
+    /// True when no saved project existed: this is the first time the take is opened.
+    private(set) var isNewProject = false
 
     /// Cursor, click and keystroke rendering is available because the take
     /// recorded them separately from its pixels.
@@ -139,6 +141,7 @@ final class VideoEditorDocument {
             // A new take starts with the camera where it was while recording.
             look.camera.followsRecording = cameraPlacement != nil
             project = VideoProject(sourceDuration: prepared.duration, look: look)
+            isNewProject = true
         }
         savedState = project.encoded()
         initialState = savedState

@@ -9,13 +9,15 @@ This fork adds one thing on top of upstream macshot: every capture can land in a
 - **Enter uploads** (Settings → Uploads): when on, Return after selecting an area uploads and copies the link: one keystroke from capture to shareable URL, like CleanShot Cloud.
 - **Video editor upload**: the existing Upload button in the video editor also works with Dropbox.
 - **Tests**: `macshotTests/DropboxUploaderTests.swift` covers the request flow with local fixtures (no live Dropbox).
-- **Strings**: English only. Other language files carry the English text so the localization tests stay green.
+- **English only**: the 40 other language folders are removed and the language picker offers only English.
+- **No built-in updater**: Sparkle never starts and "Check for Updates..." is gone, so an update can't replace this fork with official macshot. A monthly scheduled Claude task (1st of each month) reviews upstream and opens an `upstream-sync-YYYY-MM` pull request with a plain-language summary of what's worth taking.
+- **Video look presets** (video editor → Background panel → Presets): save the whole look (background, frame, pointer, zoom, keystrokes, camera, captions) under a name, apply it to any recording, delete it. Screen Studio has these; upstream only remembers the last look.
+- **Auto Zoom new recordings** (Zoom panel, on by default): a fresh recording opens with zooms already placed from your clicks and typing, like Screen Studio. Turn it off to start with no zooms.
 
 ## Before daily use (do these once)
 
-1. **Turn off upstream auto-updates in your build.** The app's Sparkle feed still points at the official macshot appcast, so an update would replace this fork with the official app and drop the Dropbox feature. Easiest: in Xcode, set `SUFeedURL` in `Info.plist` to your fork's own appcast or remove it, and untick automatic update checks in Preferences.
-2. **Bundle ID.** The fork still uses `com.sw33tlie.macshot.macshot`. Fine if you replace the official app; change it in the project settings if you want both installed side by side.
-3. **Dropbox app** (one time, about 2 minutes): see the PR description.
+1. **Bundle ID.** The fork still uses `com.sw33tlie.macshot.macshot`. Fine if you replace the official app; change it in the project settings if you want both installed side by side.
+2. **Dropbox app** (one time, about 2 minutes): see the PR description.
 
 ## Screenshot tune-up (next)
 
@@ -36,7 +38,12 @@ Upstream macshot's Studio video editor already covers most of what Screen Studio
 - **Auto-zoom** suggestions from clicks and typing that follow the pointer (`AutoZoomPlanner`), plus a camera path with motion blur.
 - Frame/background styling, keystroke overlays, webcam bubble, on-device captions, MP4 and GIF export.
 
-So the plan for video is to **test before building**:
+This fork adds look presets and auto-zoom on open (above). Remaining Screen Studio gaps worth considering:
+
+- **Audio enhance**: one-click volume normalize and noise reduction for the mic track (Screen Studio has this; macshot only mixes track volumes).
+- **Vertical/social export preset**: one click to 9:16 with a matching look preset.
+
+Next, **test before building more**:
 
 1. Record a 1–2 minute demo with "Editable pointer" on, open it in the editor, apply auto-zoom, export, and compare against the same demo in Screen Studio.
 2. Write down the gaps you actually feel (likely candidates: zoom presets you can save, auto-applying your look on stop, export presets for vertical social video).

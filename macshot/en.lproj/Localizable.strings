@@ -487,6 +487,14 @@
 
 /* Effects Picker (Adjust popover) */
 "Presets" = "Presets";
+"No saved presets yet" = "No saved presets yet";
+"Apply a preset…" = "Apply a preset…";
+"Save Look as Preset…" = "Save Look as Preset…";
+"Save Look as Preset" = "Save Look as Preset";
+"Saves the background, frame, pointer, zoom, keystroke, camera and caption settings. A preset with the same name is replaced." = "Saves the background, frame, pointer, zoom, keystroke, camera and caption settings. A preset with the same name is replaced.";
+"Preset name" = "Preset name";
+"Delete a Preset…" = "Delete a Preset…";
+"Delete a Preset" = "Delete a Preset";
 "Adjustments" = "Adjustments";
 "Brightness" = "Brightness";
 "Contrast" = "Contrast";
@@ -833,6 +841,8 @@
 "Regenerate Captions" = "Regenerate Captions";
 "Regular" = "Regular";
 "Remove Automatic Zooms" = "Remove Automatic Zooms";
+"Auto Zoom new recordings" = "Auto Zoom new recordings";
+"Place zooms automatically the first time a recording opens" = "Place zooms automatically the first time a recording opens";
 "Remove Captions" = "Remove Captions";
 "Removes %.1f seconds from the video. Drag its edges on the timeline to adjust." = "Removes %.1f seconds from the video. Drag its edges on the timeline to adjust.";
 "Return to start at the end" = "Return to start at the end";

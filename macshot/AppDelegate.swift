@@ -311,7 +311,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
         // something references ScreenshotHistory.shared.
         _ = ScreenshotHistory.shared
 
-        updaterController = SPUStandardUpdaterController(startingUpdater: true, updaterDelegate: self, userDriverDelegate: nil)
+        // Fork: the built-in updater would replace this build with official
+        // macshot. Updates come from a monthly Claude review of upstream
+        // instead (see docs/fork-plan.md), so the updater never starts.
+        updaterController = SPUStandardUpdaterController(startingUpdater: false, updaterDelegate: self, userDriverDelegate: nil)
         // Disable silent update downloads — updates should only apply
         // via explicit user action ("Check for Updates..." / Install),
         // so an automatic update can't be mistaken for a silent crash.
@@ -906,10 +909,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
         prefsItem.image = NSImage(systemSymbolName: "gear", accessibilityDescription: nil)
         menu.addItem(prefsItem)
 
-        let updateItem = NSMenuItem(title: L("Check for Updates..."), action: #selector(checkForUpdates), keyEquivalent: "")
-        updateItem.target = self
-        updateItem.image = NSImage(systemSymbolName: "arrow.triangle.2.circlepath", accessibilityDescription: nil)
-        menu.addItem(updateItem)
+        // Fork: no "Check for Updates..." item. Upstream changes arrive as
+        // monthly pull requests instead of Sparkle updates.
 
         menu.addItem(NSMenuItem.separator())
 
