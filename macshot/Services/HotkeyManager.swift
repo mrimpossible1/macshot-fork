@@ -84,8 +84,8 @@ class HotkeyManager {
 
         var defaultKeyCode: UInt32 {
             switch self {
-            case .captureArea: return UInt32(kVK_ANSI_X)
-            case .captureFullScreen: return UInt32(kVK_ANSI_F)
+            case .captureArea: return UInt32(kVK_ANSI_4)      // MacShotty: replaces macOS ⌘⇧4
+            case .captureFullScreen: return UInt32(kVK_ANSI_3) // MacShotty: replaces macOS ⌘⇧3
             case .recordArea: return UInt32(kVK_ANSI_R)
             case .recordScreen: return 0
             case .historyOverlay: return UInt32(kVK_ANSI_H)

@@ -369,7 +369,7 @@ final class HotkeyManagerTests: XCTestCase {
     }
 
     func testAssigningAnotherSlotsDefaultChordClearsThatSlot() {
-        // Capture Area is unset, so it is bound through its default (Cmd+Shift+X).
+        // Capture Area is unset, so it is bound through its default (Cmd+Shift+4).
         let area = HotkeyManager.HotkeySlot.captureArea
         let screen = HotkeyManager.HotkeySlot.captureFullScreen
         withCleanHotkeys([area, screen]) {

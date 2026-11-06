@@ -8375,32 +8375,7 @@ class OverlayView: NSView {
             overlayDelegate?.overlayViewDidRequestSave()
         case .upload:
             #if !OFFLINE
-            let confirmEnabled = UserDefaults.standard.bool(forKey: "uploadConfirmEnabled")
-            if confirmEnabled {
-                let provider = UserDefaults.standard.string(forKey: "uploadProvider") ?? "imgbb"
-                let title: String
-                switch provider {
-                case "gdrive": title = L("Upload to Google Drive?")
-                case "s3": title = L("Upload to S3?")
-                default: title = L("Upload to imgbb.com?")
-                }
-                let alert = NSAlert()
-                alert.messageText = title
-                alert.informativeText = L("Your screenshot will be uploaded.")
-                alert.addButton(withTitle: L("Upload"))
-                alert.addButton(withTitle: L("Cancel"))
-                alert.alertStyle = .informational
-                // Temporarily lower window level so the alert is visible
-                let originalLevel = window?.level ?? .statusBar
-                window?.level = .normal
-                let response = alert.runModal()
-                window?.level = originalLevel
-                if response == .alertFirstButtonReturn {
-                    overlayDelegate?.overlayViewDidRequestUpload()
-                }
-            } else {
-                overlayDelegate?.overlayViewDidRequestUpload()
-            }
+            requestUploadWithConfirmation()
             #endif
         case .share:
             // Show share picker anchored to the share button, then dismiss on selection
@@ -9303,6 +9278,40 @@ class OverlayView: NSView {
         return super.performKeyEquivalent(with: event)
     }
 
+    #if !OFFLINE
+    /// Upload the selection, asking first when "Confirm before uploading" is on.
+    /// Used by the toolbar Upload button and by Return when "Enter uploads" is on.
+    func requestUploadWithConfirmation() {
+        let confirmEnabled = UserDefaults.standard.bool(forKey: "uploadConfirmEnabled")
+        if confirmEnabled {
+            let provider = UserDefaults.standard.string(forKey: "uploadProvider") ?? "imgbb"
+            let title: String
+            switch provider {
+            case "gdrive": title = L("Upload to Google Drive?")
+            case "s3": title = L("Upload to S3?")
+            case "dropbox": title = L("Upload to Dropbox?")
+            default: title = L("Upload to imgbb.com?")
+            }
+            let alert = NSAlert()
+            alert.messageText = title
+            alert.informativeText = L("Your screenshot will be uploaded.")
+            alert.addButton(withTitle: L("Upload"))
+            alert.addButton(withTitle: L("Cancel"))
+            alert.alertStyle = .informational
+            // Temporarily lower window level so the alert is visible
+            let originalLevel = window?.level ?? .statusBar
+            window?.level = .normal
+            let response = alert.runModal()
+            window?.level = originalLevel
+            if response == .alertFirstButtonReturn {
+                overlayDelegate?.overlayViewDidRequestUpload()
+            }
+        } else {
+            overlayDelegate?.overlayViewDidRequestUpload()
+        }
+    }
+    #endif
+
     override func keyDown(with event: NSEvent) {
         if isRecognizingText {
             if event.keyCode == 53 {  // Escape abandons the OCR run
@@ -9448,6 +9457,13 @@ class OverlayView: NSView {
             }
         case 36, 76:  // Return / numpad Enter — quick capture (respects quickCaptureMode setting)
             if textEditView == nil, state == .selected {
+                #if !OFFLINE
+                // "Enter uploads" turns Return into capture → upload → link on the clipboard.
+                if !isEditorMode, UserDefaults.standard.bool(forKey: "quickCaptureUploads") {
+                    requestUploadWithConfirmation()
+                    break
+                }
+                #endif
                 overlayDelegate?.overlayViewDidRequestQuickSave()
             }
         case 51, 117:  // Backspace / Forward-Delete — remove selected annotation(s)

@@ -256,12 +256,12 @@ class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         // Prevent multiple instances — if already running, activate the existing one and quit
-        let bundleID = Bundle.main.bundleIdentifier ?? "com.sw33tlie.macshot.macshot"
+        let bundleID = Bundle.main.bundleIdentifier ?? "com.mrimpossible1.macshotty"
         let running = NSRunningApplication.runningApplications(withBundleIdentifier: bundleID)
         if running.count > 1 {
             // Tell the existing instance to show its icon and open Settings
             DistributedNotificationCenter.default().postNotificationName(
-                .init("com.sw33tlie.macshot.showAndOpenPrefs"),
+                .init("com.mrimpossible1.macshotty.showAndOpenPrefs"),
                 object: nil, userInfo: nil, deliverImmediately: true
             )
             NSApp.terminate(nil)
@@ -271,6 +271,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
         // Clear image-effect state written by a pre-June-2026 build, which
         // otherwise leaves Vivid silently applied to every capture (#345).
         EffectsMigration.runIfNeeded()
+        #if !OFFLINE
+        DropboxUploader.shared.startMonthlyArchiveSchedule()
+        #endif
         MicrophoneDeviceSelection.repairLegacyPreference()
 
         // Surface save failures — otherwise a capture that can't be written
@@ -311,7 +314,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
         // something references ScreenshotHistory.shared.
         _ = ScreenshotHistory.shared
 
-        updaterController = SPUStandardUpdaterController(startingUpdater: true, updaterDelegate: self, userDriverDelegate: nil)
+        // Fork: the built-in updater would replace this build with official
+        // macshot. Updates come from a monthly Claude review of upstream
+        // instead (see docs/fork-plan.md), so the updater never starts.
+        updaterController = SPUStandardUpdaterController(startingUpdater: false, updaterDelegate: self, userDriverDelegate: nil)
         // Disable silent update downloads — updates should only apply
         // via explicit user action ("Check for Updates..." / Install),
         // so an automatic update can't be mistaken for a silent crash.
@@ -333,7 +339,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
         // Listen for duplicate-launch notification to restore icon
         DistributedNotificationCenter.default().addObserver(
             self, selector: #selector(handleShowAndOpenPrefs),
-            name: .init("com.sw33tlie.macshot.showAndOpenPrefs"), object: nil
+            name: .init("com.mrimpossible1.macshotty.showAndOpenPrefs"), object: nil
         )
 
         // Dismiss overlays when the user switches spaces
@@ -605,7 +611,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
         } catch {
             let errAlert = NSAlert()
             errAlert.messageText = "Could not move to Applications"
-            errAlert.informativeText = "Please drag macshot to your Applications folder manually.\n\n\(error.localizedDescription)"
+            errAlert.informativeText = "Please drag MacShotty to your Applications folder manually.\n\n\(error.localizedDescription)"
             errAlert.runModal()
         }
     }
@@ -667,9 +673,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
         mainMenu.addItem(appMenuItem)
 
         let appMenu = NSMenu()
-        appMenu.addItem(withTitle: "About macshot", action: #selector(NSApplication.orderFrontStandardAboutPanel(_:)), keyEquivalent: "")
+        appMenu.addItem(withTitle: "About MacShotty", action: #selector(NSApplication.orderFrontStandardAboutPanel(_:)), keyEquivalent: "")
         appMenu.addItem(NSMenuItem.separator())
-        appMenu.addItem(withTitle: "Quit macshot", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
+        appMenu.addItem(withTitle: "Quit MacShotty", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
         appMenuItem.submenu = appMenu
 
         let fileMenuItem = NSMenuItem()
@@ -739,7 +745,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
         let symbolName = UserDefaults.standard.string(forKey: Self.statusBarIconSymbolNameKey) ?? ""
 
         if mode == "symbol", !symbolName.isEmpty,
-           let symbol = NSImage(systemSymbolName: symbolName, accessibilityDescription: "macshot") {
+           let symbol = NSImage(systemSymbolName: symbolName, accessibilityDescription: BuildVariant.displayName) {
             symbol.isTemplate = true
             symbol.size = NSSize(width: 22, height: 22)
             button.image = symbol
@@ -751,7 +757,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
             button.title = ""
         } else {
             button.image = nil
-            button.title = "macshot"
+            button.title = BuildVariant.displayName
         }
     }
 
@@ -868,6 +874,19 @@ class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
         HotkeyManager.applyMenuShortcut(for: .historyOverlay, to: historyOverlayItem)
         menu.addItem(historyOverlayItem)
 
+        // Before / After from the two most recent captures
+        let beforeAfterItem = NSMenuItem(title: L("Before / After (Last 2 Captures)"), action: nil, keyEquivalent: "")
+        beforeAfterItem.image = NSImage(systemSymbolName: "rectangle.split.2x1", accessibilityDescription: nil)
+        let beforeAfterMenu = NSMenu()
+        let sideBySideItem = NSMenuItem(title: L("Side-by-Side Image"), action: #selector(makeBeforeAfterImage), keyEquivalent: "")
+        sideBySideItem.target = self
+        beforeAfterMenu.addItem(sideBySideItem)
+        let gifItem = NSMenuItem(title: L("Animated GIF…"), action: #selector(makeBeforeAfterGIF), keyEquivalent: "")
+        gifItem.target = self
+        beforeAfterMenu.addItem(gifItem)
+        beforeAfterItem.submenu = beforeAfterMenu
+        menu.addItem(beforeAfterItem)
+
         menu.addItem(NSMenuItem.separator())
 
         let openImageItem = NSMenuItem(title: L("Open Image..."), action: #selector(openImageFromMenu), keyEquivalent: "")
@@ -906,10 +925,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
         prefsItem.image = NSImage(systemSymbolName: "gear", accessibilityDescription: nil)
         menu.addItem(prefsItem)
 
-        let updateItem = NSMenuItem(title: L("Check for Updates..."), action: #selector(checkForUpdates), keyEquivalent: "")
-        updateItem.target = self
-        updateItem.image = NSImage(systemSymbolName: "arrow.triangle.2.circlepath", accessibilityDescription: nil)
-        menu.addItem(updateItem)
+        // Fork: no "Check for Updates..." item. Upstream changes arrive as
+        // monthly pull requests instead of Sparkle updates.
 
         menu.addItem(NSMenuItem.separator())
 
@@ -2092,8 +2109,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
     }
 
     private func thumbnailCorner() -> FloatingThumbnailCorner {
-        let rawValue = UserDefaults.standard.string(forKey: "thumbnailCorner") ?? FloatingThumbnailCorner.bottomRight.rawValue
-        return FloatingThumbnailCorner(rawValue: rawValue) ?? .bottomRight
+        let rawValue = UserDefaults.standard.string(forKey: "thumbnailCorner") ?? FloatingThumbnailCorner.bottomLeft.rawValue
+        return FloatingThumbnailCorner(rawValue: rawValue) ?? .bottomLeft
     }
 
     private func thumbnailX(
@@ -2230,50 +2247,70 @@ class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
             return
         }
 
-        if provider == "gdrive" {
-            GoogleDriveUploader.shared.uploadImage(image) { result in
-                switch result {
-                case .success(let link):
-                    let pasteboard = NSPasteboard.general
-                    pasteboard.clearContents()
-                    pasteboard.setString(link, forType: .string)
-                    toast.showSuccess(link: link, deleteURL: "")
-                case .failure(let error):
-                    toast.showError(message: error.localizedDescription)
-                }
-            }
-        } else if provider == "s3" {
-            S3Uploader.shared.uploadImage(image, progress: { fraction in
-                toast.updateProgress(fraction)
-            }) { result in
-                switch result {
-                case .success(let link):
-                    let pasteboard = NSPasteboard.general
-                    pasteboard.clearContents()
-                    pasteboard.setString(link, forType: .string)
-                    toast.showSuccess(link: link, deleteURL: "")
-                case .failure(let error):
-                    toast.showError(message: error.localizedDescription)
-                }
-            }
-        } else {
-            ImageUploader.upload(image: image) { result in
-                switch result {
-                case .success(let uploadResult):
-                    let pasteboard = NSPasteboard.general
-                    pasteboard.clearContents()
-                    pasteboard.setString(uploadResult.link, forType: .string)
+        if provider == "dropbox" && !DropboxUploader.shared.isSignedIn {
+            toast.showError(message: "Dropbox not connected. Check Settings.")
+            return
+        }
 
-                    var uploads = UserDefaults.standard.array(forKey: "imgbbUploads") as? [[String: String]] ?? []
-                    uploads.append([
-                        "deleteURL": uploadResult.deleteURL,
-                        "link": uploadResult.link,
-                    ])
-                    UserDefaults.standard.set(uploads, forKey: "imgbbUploads")
+        // Auto-redact sensitive text and name the file from its own text
+        // before anything leaves the Mac (Settings → Uploads).
+        UploadPreparation.prepare(image, wantsTitle: provider == "dropbox") { prepared in
+            if prepared.couldNotCheck {
+                toast.showError(message: "Couldn't check this screenshot for sensitive text, so it wasn't uploaded. Try again, or turn off auto-redact in Settings → Uploads.")
+                return
+            }
+            let image = prepared.image
+            if provider == "dropbox" {
+                DropboxUploader.shared.uploadImage(image, title: prepared.title, progress: { fraction in
+                    toast.updateProgress(fraction)
+                }) { result in
+                    switch result {
+                    case .success(let link):
+                        UploadLinkClipboard.copy(link)
+                        toast.showSuccess(link: link, deleteURL: "")
+                    case .failure(let error):
+                        toast.showError(message: error.localizedDescription)
+                    }
+                }
+            } else if provider == "gdrive" {
+                GoogleDriveUploader.shared.uploadImage(image) { result in
+                    switch result {
+                    case .success(let link):
+                        UploadLinkClipboard.copy(link)
+                        toast.showSuccess(link: link, deleteURL: "")
+                    case .failure(let error):
+                        toast.showError(message: error.localizedDescription)
+                    }
+                }
+            } else if provider == "s3" {
+                S3Uploader.shared.uploadImage(image, progress: { fraction in
+                    toast.updateProgress(fraction)
+                }) { result in
+                    switch result {
+                    case .success(let link):
+                        UploadLinkClipboard.copy(link)
+                        toast.showSuccess(link: link, deleteURL: "")
+                    case .failure(let error):
+                        toast.showError(message: error.localizedDescription)
+                    }
+                }
+            } else {
+                ImageUploader.upload(image: image) { result in
+                    switch result {
+                    case .success(let uploadResult):
+                        UploadLinkClipboard.copy(uploadResult.link)
 
-                    toast.showSuccess(link: uploadResult.link, deleteURL: uploadResult.deleteURL)
-                case .failure(let error):
-                    toast.showError(message: error.localizedDescription)
+                        var uploads = UserDefaults.standard.array(forKey: "imgbbUploads") as? [[String: String]] ?? []
+                        uploads.append([
+                            "deleteURL": uploadResult.deleteURL,
+                            "link": uploadResult.link,
+                        ])
+                        UserDefaults.standard.set(uploads, forKey: "imgbbUploads")
+
+                        toast.showSuccess(link: uploadResult.link, deleteURL: uploadResult.deleteURL)
+                    case .failure(let error):
+                        toast.showError(message: error.localizedDescription)
+                    }
                 }
             }
         }
@@ -2330,7 +2367,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
         panel.canChooseDirectories = false
         panel.allowsMultipleSelection = true
         panel.allowedContentTypes = [.png, .jpeg, .tiff, .bmp, .gif, .heic, .webP, .image]
-        panel.message = "Choose an image to open in macshot editor"
+        panel.message = "Choose an image to open in the MacShotty editor"
 
         NSApp.activate(ignoringOtherApps: true)
         panel.begin { response in
@@ -3652,4 +3689,122 @@ extension AppDelegate: NSMenuDelegate {
             ScreenshotHistory.shared.clear()
         }
     }
+}
+
+// MARK: - Before / After
+
+extension AppDelegate {
+    /// The two most recent captures: the older is Before, the newer is After.
+    private func lastTwoCaptures() -> (before: CGImage, after: CGImage)? {
+        let history = ScreenshotHistory.shared
+        let recent = Array(history.entries.sorted { $0.timestamp > $1.timestamp }.prefix(2))
+        guard recent.count == 2,
+              let after = history.loadImage(for: recent[0])?.cgImage(forProposedRect: nil, context: nil, hints: nil),
+              let before = history.loadImage(for: recent[1])?.cgImage(forProposedRect: nil, context: nil, hints: nil)
+        else { return nil }
+        return (before, after)
+    }
+
+    private func pointImage(_ image: CGImage) -> NSImage {
+        let scale = NSScreen.main?.backingScaleFactor ?? 2
+        return NSImage(cgImage: image, size: NSSize(width: CGFloat(image.width) / scale, height: CGFloat(image.height) / scale))
+    }
+
+    private var needTwoCapturesMessage: String {
+        L("Take two captures first. Your latest capture is After and the one before it is Before.")
+    }
+
+    @objc func makeBeforeAfterImage() {
+        guard let pair = lastTwoCaptures() else { showFailureToast(needTwoCapturesMessage); return }
+        guard let combined = BeforeAfterRenderer.sideBySide(before: pair.before, after: pair.after) else {
+            showFailureToast(L("Couldn't make the before/after image."))
+            return
+        }
+        // Opens in the editor, so it can be marked up, saved, copied or uploaded like any capture.
+        DetachedEditorWindowController.open(image: pointImage(combined))
+    }
+
+    @objc func makeBeforeAfterGIF() {
+        guard let pair = lastTwoCaptures() else { showFailureToast(needTwoCapturesMessage); return }
+        guard let data = BeforeAfterRenderer.gif(before: pair.before, after: pair.after) else {
+            showFailureToast(L("Couldn't make the before/after GIF."))
+            return
+        }
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.dateFormat = "yyyy-MM-dd 'at' HH.mm.ss"
+        let filename = "Before-After \(formatter.string(from: Date())).gif"
+
+        let alert = NSAlert()
+        alert.messageText = L("Before/after GIF ready")
+        alert.informativeText = String(format: L("Fades between your last two captures (%@)."),
+                                       ByteCountFormatter.string(fromByteCount: Int64(data.count), countStyle: .file))
+        alert.addButton(withTitle: L("Save…"))
+        #if !OFFLINE
+        let canUpload = DropboxUploader.shared.isSignedIn
+        if canUpload { alert.addButton(withTitle: L("Upload to Dropbox & Copy Link")) }
+        #endif
+        alert.addButton(withTitle: L("Cancel"))
+        NSApp.activate(ignoringOtherApps: true)
+        let response = alert.runModal()
+
+        if response == .alertFirstButtonReturn {
+            let panel = NSSavePanel()
+            panel.allowedContentTypes = [.gif]
+            panel.nameFieldStringValue = filename
+            if panel.runModal() == .OK, let url = panel.url {
+                do { try data.write(to: url, options: .atomic) }
+                catch { showFailureToast(String(format: L("Couldn't save the GIF: %@"), error.localizedDescription)) }
+            }
+        }
+        #if !OFFLINE
+        if canUpload, response == .alertSecondButtonReturn {
+            uploadBeforeAfterGIF(pair, filename: filename)
+        }
+        #endif
+        returnFocusIfNeeded()
+    }
+
+    #if !OFFLINE
+    /// Redacts both shots (per Settings → Uploads) before building the GIF
+    /// that leaves the Mac, then uploads it and copies the link.
+    private func uploadBeforeAfterGIF(_ pair: (before: CGImage, after: CGImage), filename: String) {
+        uploadToastController?.dismiss()
+        let toast = UploadToastController()
+        uploadToastController = toast
+        toast.onDismiss = { [weak self] in self?.uploadToastController = nil }
+        toast.show(status: "Uploading...")
+        let cannotCheck = "Couldn't check these screenshots for sensitive text, so the GIF wasn't uploaded. Try again, or turn off auto-redact in Settings → Uploads."
+
+        UploadPreparation.prepare(pointImage(pair.before), wantsTitle: false) { [weak self] before in
+            guard let self else { return }
+            UploadPreparation.prepare(self.pointImage(pair.after), wantsTitle: false) { after in
+                guard !before.couldNotCheck, !after.couldNotCheck else { toast.showError(message: cannotCheck); return }
+                guard let b = before.image.cgImage(forProposedRect: nil, context: nil, hints: nil),
+                      let a = after.image.cgImage(forProposedRect: nil, context: nil, hints: nil),
+                      let data = BeforeAfterRenderer.gif(before: b, after: a) else {
+                    toast.showError(message: "Couldn't make the before/after GIF.")
+                    return
+                }
+                let url = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString + ".gif")
+                do { try data.write(to: url, options: .atomic) } catch {
+                    toast.showError(message: error.localizedDescription)
+                    return
+                }
+                DropboxUploader.shared.upload(payload: .file(url), filename: filename, progress: { fraction in
+                    toast.updateProgress(fraction)
+                }) { result in
+                    try? FileManager.default.removeItem(at: url)
+                    switch result {
+                    case .success(let link):
+                        UploadLinkClipboard.copy(link)
+                        toast.showSuccess(link: link, deleteURL: "")
+                    case .failure(let error):
+                        toast.showError(message: error.localizedDescription)
+                    }
+                }
+            }
+        }
+    }
+    #endif
 }
