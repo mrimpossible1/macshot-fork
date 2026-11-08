@@ -403,6 +403,41 @@ class ToolbarLayout {
         return buttons
     }
 
+    /// MacShotty short toolbar: the given tools (in that order, when enabled),
+    /// the color, and undo. Everything else lives in the editor.
+    static func simpleBottomButtons(from buttons: [ToolbarButton], tools: [AnnotationTool]) -> [ToolbarButton] {
+        var picked: [ToolbarButton] = []
+        for tool in tools {
+            if let button = buttons.first(where: { if case .tool(let t) = $0.action { return t == tool }; return false }) {
+                picked.append(button)
+            }
+        }
+        for button in buttons {
+            switch button.action {
+            case .color, .undo: picked.append(button)
+            default: break
+            }
+        }
+        return picked
+    }
+
+    /// MacShotty short toolbar: cancel, copy, link (upload), save, and
+    /// "All tools", which opens the capture in the editor with every tool.
+    static func simpleRightButtons(from buttons: [ToolbarButton]) -> [ToolbarButton] {
+        var picked: [ToolbarButton] = []
+        for button in buttons {
+            switch button.action {
+            case .cancel, .copy, .save: picked.append(button)
+            case .upload: picked.append(ToolbarButton(action: .upload, sfSymbol: "link", tooltip: L("Copy link (upload)")))
+            default: break
+            }
+        }
+        if buttons.contains(where: { if case .detach = $0.action { return true }; return false }) {
+            picked.append(ToolbarButton(action: .detach, sfSymbol: "ellipsis.circle", tooltip: L("All tools (open in editor)")))
+        }
+        return picked
+    }
+
     // Right toolbar items (output actions + cancel + delay)
     static func rightButtons(
         beautifyEnabled: Bool = false, beautifyStyleIndex: Int = 0, hasAnnotations: Bool = false,

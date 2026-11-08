@@ -900,6 +900,12 @@ class SettingsWindowController: NSWindowController, NSToolbarDelegate, NSWindowD
         stack.addArrangedSubview(indented(hideCaptureInstructionsCheckbox))
         stack.setCustomSpacing(6, after: stack.arrangedSubviews.last!)
 
+        let simpleToolbarCheckbox = NSButton(checkboxWithTitle: L("Simple toolbar for Capture Area and Capture Screen (six tools, Copy, Link, Save)"),
+                                             target: self, action: #selector(simpleToolbarChanged(_:)))
+        simpleToolbarCheckbox.state = AppDelegate.simpleCaptureToolbar ? .on : .off
+        stack.addArrangedSubview(indented(simpleToolbarCheckbox))
+        stack.setCustomSpacing(6, after: stack.arrangedSubviews.last!)
+
         stack.addArrangedSubview(indented(disableSelectionShadowCheckbox))
         stack.setCustomSpacing(20, after: stack.arrangedSubviews.last!)
 
@@ -3372,6 +3378,10 @@ class SettingsWindowController: NSWindowController, NSToolbarDelegate, NSWindowD
     @objc private func doubleClickToCopyChanged(_ sender: NSButton) {
         UserDefaults.standard.set(sender.state == .on, forKey: "doubleClickToCopy")
     }
+    @objc private func simpleToolbarChanged(_ sender: NSButton) {
+        UserDefaults.standard.set(sender.state == .on, forKey: "simpleCaptureToolbar")
+    }
+
     @objc private func hideCaptureInstructionsChanged(_ sender: NSButton) {
         UserDefaults.standard.set(sender.state == .on, forKey: "hideCaptureInstructions")
     }

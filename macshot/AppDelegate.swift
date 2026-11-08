@@ -1020,6 +1020,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
             recordGIF: { [weak self] in
                 stamp()
                 self?.perform(#selector(AppDelegate.recordGIFFromHotkey))
+            },
+            captureAreaAllTools: { [weak self] in
+                stamp()
+                self?.perform(#selector(AppDelegate.captureAllToolsFromHotkey))
             }
         )
     }
@@ -1045,6 +1049,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
     private var pendingTranslateOverlayMode: Bool = false
     private var pendingTranslateOverlayLang: String?
     private var pendingQuickCaptureMode: Bool = false
+    private var pendingSimpleMarkup: Bool = false
     private var pendingScrollCaptureMode: Bool = false
     private var capturedWindowTitle: String?
     /// The app that was active before the overlay appeared — re-activated on dismiss.
@@ -1125,7 +1130,20 @@ class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
     }
 
     private func beginCaptureArea(fromMenu: Bool) {
+        pendingSimpleMarkup = canStartCapture && Self.simpleCaptureToolbar
         startCapture(fromMenu: fromMenu)
+    }
+
+    /// MacShotty: the full macshot toolbar (every tool, recording, OCR…).
+    @objc private func captureAllToolsFromHotkey() {
+        pendingSimpleMarkup = false
+        startCapture(fromMenu: false)
+    }
+
+    /// MacShotty: Capture Area and Capture Screen open the short toolbar
+    /// (six tools, Copy / Link / Save, "All tools" opens the editor).
+    static var simpleCaptureToolbar: Bool {
+        UserDefaults.standard.object(forKey: "simpleCaptureToolbar") as? Bool ?? true
     }
 
     @objc private func captureFullScreen() {
@@ -1139,6 +1157,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
     private func beginCaptureFullScreen(fromMenu: Bool) {
         guard canStartCapture else { return }
         pendingFullScreen = true
+        pendingSimpleMarkup = Self.simpleCaptureToolbar
         startCapture(fromMenu: fromMenu)
     }
 
@@ -1428,6 +1447,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
         pendingQuickCaptureMode = false
         pendingScrollCaptureMode = false
         pendingRestoreLastArea = false
+        pendingSimpleMarkup = false
     }
 
     private func performCapture(fromMenu: Bool) {
@@ -1469,11 +1489,14 @@ class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
             if pendingTranslateOverlayMode { controller.setAutoTranslateOverlayMode(targetLang: pendingTranslateOverlayLang) }
             if pendingQuickCaptureMode { controller.setAutoQuickSaveMode() }
             if pendingScrollCaptureMode { controller.setAutoScrollCaptureMode() }
+            // Set every time: overlay controllers are pooled and reused.
+            controller.setSimpleMarkupMode(pendingSimpleMarkup)
             controllers.append(controller)
         }
         overlayControllers.append(contentsOf: controllers)
 
         pendingRecordMode = false
+        pendingSimpleMarkup = false
         let didApplyFullScreenRecord = pendingFullScreenRecord
         let didApplyFullScreenRecordAutoStart = pendingFullScreenRecordAutoStart
         let didApplyFullScreen = pendingFullScreen

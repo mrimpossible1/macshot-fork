@@ -5168,8 +5168,17 @@ class OverlayView: NSView {
 
     // MARK: - Toolbar Layout
 
+    /// MacShotty: per-session short toolbar (⌘⇧4 / ⌘⇧3). The full toolbar is
+    /// one click away ("All tools" opens the editor) or on its own hotkey.
+    var simpleMarkupMode = false
+    static let simpleMarkupTools: [AnnotationTool] = [.arrow, .text, .rectangle, .marker, .pixelate, .number]
+    private var showsSimpleToolbar: Bool { simpleMarkupMode && !isEditorMode && !isRecording }
+
     /// Rebuild toolbar button content. Call when tool, color, or state changes — NOT on every draw.
     func rebuildToolbarLayout() {
+        if showsSimpleToolbar, currentTool != .select, !Self.simpleMarkupTools.contains(currentTool) {
+            currentTool = .arrow
+        }
         // Clear tooltip before rebuilding — old button views are about to be destroyed
         hoveredTooltip = nil
         hoveredTooltipButtonView = nil
@@ -5195,6 +5204,10 @@ class OverlayView: NSView {
             hasAnnotations: movableAnnotations, translateEnabled: translateEnabled,
             isRecording: isRecording,
             isEditorMode: isEditorMode)
+        if showsSimpleToolbar {
+            bottomButtons = ToolbarLayout.simpleBottomButtons(from: bottomButtons, tools: Self.simpleMarkupTools)
+            rightButtons = ToolbarLayout.simpleRightButtons(from: rightButtons)
+        }
 
         // Create strip views if needed — add to chrome parent (window content) when in scroll view
         let parent = chromeParentView ?? self
@@ -10405,6 +10418,7 @@ class OverlayView: NSView {
         autoQuickSaveMode = false
         autoScrollCaptureMode = false
         autoConfirmMode = false
+        simpleMarkupMode = false
         isRecognizingText = false
         pendingDoubleClickCopy = nil
         lastMouseUpAt = -.infinity

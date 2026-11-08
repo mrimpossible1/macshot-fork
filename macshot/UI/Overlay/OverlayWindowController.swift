@@ -373,6 +373,11 @@ class OverlayWindowController {
         overlayView?.autoQuickSaveMode = true
     }
 
+    /// MacShotty: the short toolbar for ⌘⇧4 / ⌘⇧3 captures.
+    func setSimpleMarkupMode(_ on: Bool) {
+        overlayView?.simpleMarkupMode = on
+    }
+
     /// Set flag so overlay triggers scroll capture immediately after user makes a selection.
     func setAutoScrollCaptureMode() {
         overlayView?.autoScrollCaptureMode = true
