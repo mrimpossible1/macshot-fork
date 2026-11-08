@@ -1798,7 +1798,7 @@ class OverlayView: NSView {
 
         // Helper text (capture instructions). Suppressed when the user has
         // enabled "Hide capture instructions" in Settings (issue #226).
-        if UserDefaults.standard.bool(forKey: "hideCaptureInstructions") {
+        if (UserDefaults.standard.object(forKey: "hideCaptureInstructions") as? Bool ?? true) {
             hidePreSelectionPresetButton()
         } else {
             if state == .idle {
