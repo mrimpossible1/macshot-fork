@@ -1130,8 +1130,18 @@ class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
     }
 
     private func beginCaptureArea(fromMenu: Bool) {
-        pendingSimpleMarkup = canStartCapture && Self.simpleCaptureToolbar
+        guard canStartCapture else { return }
+        pendingSimpleMarkup = Self.simpleCaptureToolbar
+        // CleanShot-style: release the drag (or click a window) and it's copied,
+        // with the thumbnail bottom-left. Click the thumbnail to mark it up.
+        pendingQuickCaptureMode = Self.instantCapture
         startCapture(fromMenu: fromMenu)
+    }
+
+    /// MacShotty: ⌘⇧4 / ⌘⇧3 copy right away and show the thumbnail, instead
+    /// of keeping the screen frozen with a toolbar. Settings → General.
+    static var instantCapture: Bool {
+        UserDefaults.standard.object(forKey: "instantCapture") as? Bool ?? true
     }
 
     /// MacShotty: the full macshot toolbar (every tool, recording, OCR…).
@@ -1158,6 +1168,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
         guard canStartCapture else { return }
         pendingFullScreen = true
         pendingSimpleMarkup = Self.simpleCaptureToolbar
+        pendingQuickCaptureMode = Self.instantCapture
         startCapture(fromMenu: fromMenu)
     }
 
@@ -1641,6 +1652,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
             if (applyFullScreen || applyFullScreenRecord) && isMouseScreen {
                 measureCaptureTiming("apply full screen selection") {
                     controller.applyFullScreenSelection()
+                }
+                // Instant full-screen capture: copy and go straight to the thumbnail.
+                if applyFullScreen && !applyFullScreenRecord {
+                    controller.quickSaveIfPending()
                 }
             }
             if applyFullScreenRecord && isMouseScreen {

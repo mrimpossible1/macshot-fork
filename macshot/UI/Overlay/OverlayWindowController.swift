@@ -373,6 +373,14 @@ class OverlayWindowController {
         overlayView?.autoQuickSaveMode = true
     }
 
+    /// MacShotty: finish a quick capture now (used after a full-screen
+    /// selection, which doesn't go through the drag-to-select path).
+    func quickSaveIfPending() {
+        guard let view = overlayView, view.autoQuickSaveMode else { return }
+        view.autoQuickSaveMode = false
+        overlayViewDidRequestQuickSave()
+    }
+
     /// MacShotty: the short toolbar for ⌘⇧4 / ⌘⇧3 captures.
     func setSimpleMarkupMode(_ on: Bool) {
         overlayView?.simpleMarkupMode = on
