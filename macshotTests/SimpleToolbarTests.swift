@@ -55,6 +55,15 @@ final class SimpleToolbarTests: XCTestCase {
         #endif
     }
 
+    func testMoreToolsButtonFlipsBetweenExpandAndCollapse() {
+        let collapsed = ToolbarLayout.moreToolsButton(expanded: false)
+        let expanded = ToolbarLayout.moreToolsButton(expanded: true)
+        guard case .moreTools = collapsed.action, case .moreTools = expanded.action else {
+            return XCTFail("both states use the moreTools action")
+        }
+        XCTAssertNotEqual(collapsed.sfSymbol, expanded.sfSymbol)
+    }
+
     func testAllToolsHotkeyDefaultsToCommandShiftX() {
         let slot = HotkeyManager.HotkeySlot.captureAreaAllTools
         XCTAssertEqual(slot.defaultKeyCode, 7)  // kVK_ANSI_X

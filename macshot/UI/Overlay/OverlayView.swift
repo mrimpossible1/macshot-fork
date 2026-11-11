@@ -3476,6 +3476,8 @@ class OverlayView: NSView {
 
     /// Whether the current tool should show the options row
     var toolHasOptionsRow: Bool {
+        // MacShotty: the short bar has no options row; … shows it.
+        if showsSimpleToolbar { return false }
         // Show options row for a selected annotation's tool even when currentTool is .select
         if selectedAnnotation != nil && toolOptionsRowView?.editingAnnotation != nil {
             return true
@@ -5172,13 +5174,34 @@ class OverlayView: NSView {
     /// one click away ("All tools" opens the editor) or on its own hotkey.
     var simpleMarkupMode = false
     static let simpleMarkupTools: [AnnotationTool] = [.arrow, .text, .rectangle, .marker, .pixelate, .number]
-    private var showsSimpleToolbar: Bool { simpleMarkupMode && !isEditorMode && !isRecording }
+    /// Tools that may be active with the short bar showing (not drawn on it).
+    private static let simpleCompatibleTools: Set<AnnotationTool> = [.select, .crop, .colorSampler, .translateOverlay]
+    static let markupToolbarExpandedKey = "markupToolbarExpanded"
+    /// Short bar applies to ⌘⇧4/⌘⇧3 overlays and to the editor window.
+    private var usesSimpleToolbar: Bool {
+        guard !isRecording else { return false }
+        return isEditorMode ? AppDelegate.simpleCaptureToolbar : simpleMarkupMode
+    }
+    /// Expanded by the … button; remembered for next time.
+    var markupToolbarExpanded: Bool {
+        get { UserDefaults.standard.bool(forKey: Self.markupToolbarExpandedKey) }
+        set { UserDefaults.standard.set(newValue, forKey: Self.markupToolbarExpandedKey) }
+    }
+    private var showsSimpleToolbar: Bool { usesSimpleToolbar && !markupToolbarExpanded }
+    private var simpleToolChosenThisSession = false
 
     /// Rebuild toolbar button content. Call when tool, color, or state changes — NOT on every draw.
     func rebuildToolbarLayout() {
-        if showsSimpleToolbar, currentTool != .select, !Self.simpleMarkupTools.contains(currentTool) {
-            currentTool = .arrow
+        if showsSimpleToolbar, !Self.simpleMarkupTools.contains(currentTool),
+           !Self.simpleCompatibleTools.contains(currentTool) {
+            if simpleToolChosenThisSession {
+                // A hidden tool was picked by its key: show the full bar.
+                markupToolbarExpanded = true
+            } else {
+                currentTool = .arrow
+            }
         }
+        if showsSimpleToolbar { simpleToolChosenThisSession = true }
         // Clear tooltip before rebuilding — old button views are about to be destroyed
         hoveredTooltip = nil
         hoveredTooltipButtonView = nil
@@ -5207,6 +5230,9 @@ class OverlayView: NSView {
         if showsSimpleToolbar {
             bottomButtons = ToolbarLayout.simpleBottomButtons(from: bottomButtons, tools: Self.simpleMarkupTools)
             rightButtons = ToolbarLayout.simpleRightButtons(from: rightButtons)
+        }
+        if usesSimpleToolbar {
+            bottomButtons.append(ToolbarLayout.moreToolsButton(expanded: markupToolbarExpanded))
         }
 
         // Create strip views if needed — add to chrome parent (window content) when in scroll view
@@ -8468,6 +8494,8 @@ class OverlayView: NSView {
         case .recordSettings:
             let gearBtn = rightStripView?.buttonViews.first { if case .recordSettings = $0.action { return true }; return false }
             showRecordingSettingsPopover(anchorView: gearBtn)
+        case .moreTools:
+            markupToolbarExpanded.toggle()
         }
 
         // Rebuild toolbars to reflect new state (selected tool, color, etc.)
@@ -10419,6 +10447,7 @@ class OverlayView: NSView {
         autoScrollCaptureMode = false
         autoConfirmMode = false
         simpleMarkupMode = false
+        simpleToolChosenThisSession = false
         isRecognizingText = false
         pendingDoubleClickCopy = nil
         lastMouseUpAt = -.infinity

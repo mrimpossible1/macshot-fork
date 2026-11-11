@@ -43,6 +43,7 @@ enum ToolbarButtonAction {
     case webcam
     case recordSettings  // recording mode: open format/FPS/when-done popover
     case effects  // image effects (CIFilter adjustments + presets)
+    case moreTools  // MacShotty: expand / collapse the short markup toolbar
 }
 
 struct ToolbarButton {
@@ -419,6 +420,13 @@ class ToolbarLayout {
             }
         }
         return picked
+    }
+
+    /// MacShotty: the expand / collapse button at the end of the short bar.
+    static func moreToolsButton(expanded: Bool) -> ToolbarButton {
+        ToolbarButton(action: .moreTools,
+                      sfSymbol: expanded ? "chevron.down.circle" : "ellipsis.circle",
+                      tooltip: expanded ? L("Fewer tools") : L("More tools and options"))
     }
 
     /// MacShotty short toolbar: cancel, copy, link (upload), save, and

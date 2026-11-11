@@ -906,7 +906,7 @@ class SettingsWindowController: NSWindowController, NSToolbarDelegate, NSWindowD
         stack.addArrangedSubview(indented(instantCheckbox))
         stack.setCustomSpacing(6, after: stack.arrangedSubviews.last!)
 
-        let simpleToolbarCheckbox = NSButton(checkboxWithTitle: L("Simple toolbar for Capture Area and Capture Screen (six tools, Copy, Link, Save)"),
+        let simpleToolbarCheckbox = NSButton(checkboxWithTitle: L("Simple markup toolbar: six tools, Copy, Link, Save (the … button shows everything)"),
                                              target: self, action: #selector(simpleToolbarChanged(_:)))
         simpleToolbarCheckbox.state = AppDelegate.simpleCaptureToolbar ? .on : .off
         stack.addArrangedSubview(indented(simpleToolbarCheckbox))
