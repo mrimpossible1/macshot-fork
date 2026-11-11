@@ -266,6 +266,7 @@ final class VideoInspectorView: NSView {
     // MARK: Background
 
     private func buildBackgroundPanel() {
+        addPresetsSection()
         add(toggle(L("Frame the recording"), subtitle: L("Background, padding, rounded corners and shadow"),
                    get: { [unowned self] in self.look.frame.enabled }) { p, on in p.look.frame.enabled = on })
         add(InspectorSectionHeader(L("Background")))
@@ -414,6 +415,76 @@ final class VideoInspectorView: NSView {
         return stack
     }
 
+    // MARK: Presets
+
+    /// Saved looks: apply one to this recording, save the current look, or delete one.
+    private func addPresetsSection() {
+        let presets = VideoLookPresets.all()
+        add(InspectorSectionHeader(L("Presets")))
+        let popup = NSPopUpButton(frame: .zero, pullsDown: false)
+        popup.controlSize = .small
+        popup.translatesAutoresizingMaskIntoConstraints = false
+        popup.addItem(withTitle: presets.isEmpty ? L("No saved presets yet") : L("Apply a preset…"))
+        for preset in presets { popup.menu?.addItem(withTitle: preset.name, action: nil, keyEquivalent: "") }
+        popup.isEnabled = !presets.isEmpty
+        let handler = PopupHandler { [weak self] index in
+            guard index > 0, index - 1 < presets.count else { return }
+            self?.applyPreset(presets[index - 1])
+        }
+        popup.target = handler
+        popup.action = #selector(PopupHandler.changed(_:))
+        objc_setAssociatedObject(popup, &PopupHandler.key, handler, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+        add(popup)
+        add(button(L("Save Look as Preset…"), symbol: "square.and.arrow.down", action: #selector(saveLookPreset)))
+        if !presets.isEmpty {
+            add(button(L("Delete a Preset…"), symbol: "trash", action: #selector(deleteLookPreset)))
+        }
+    }
+
+    private func applyPreset(_ preset: VideoLookPreset) {
+        document.edit([.render, .segments]) { p in
+            p.look = preset.look
+            // Existing zooms take the preset's transition, like changing it in the Zoom panel.
+            let duration = preset.look.zoom.transition.duration
+            for zoom in p.zooms { zoom.fadeIn = duration; zoom.fadeOut = duration * 0.85 }
+        }
+        document.rememberLook()
+        controller?.lookPresetApplied()
+        DispatchQueue.main.async { [weak self] in self?.rebuild() }
+    }
+
+    @objc private func saveLookPreset() {
+        let alert = NSAlert()
+        alert.messageText = L("Save Look as Preset")
+        alert.informativeText = L("Saves the background, frame, pointer, zoom, keystroke, camera and caption settings. A preset with the same name is replaced.")
+        let field = NSTextField(frame: NSRect(x: 0, y: 0, width: 260, height: 24))
+        field.placeholderString = L("Preset name")
+        alert.accessoryView = field
+        alert.addButton(withTitle: L("Save"))
+        alert.addButton(withTitle: L("Cancel"))
+        alert.window.initialFirstResponder = field
+        guard alert.runModal() == .alertFirstButtonReturn else { return }
+        guard VideoLookPresets.save(name: field.stringValue, look: look) else { NSSound.beep(); return }
+        rebuild()
+    }
+
+    @objc private func deleteLookPreset() {
+        let presets = VideoLookPresets.all()
+        guard !presets.isEmpty else { return }
+        let alert = NSAlert()
+        alert.messageText = L("Delete a Preset")
+        let picker = NSPopUpButton(frame: NSRect(x: 0, y: 0, width: 260, height: 26), pullsDown: false)
+        for preset in presets { picker.menu?.addItem(withTitle: preset.name, action: nil, keyEquivalent: "") }
+        alert.accessoryView = picker
+        alert.addButton(withTitle: L("Delete"))
+        alert.addButton(withTitle: L("Cancel"))
+        guard alert.runModal() == .alertFirstButtonReturn else { return }
+        let index = picker.indexOfSelectedItem
+        guard index >= 0, index < presets.count else { return }
+        VideoLookPresets.delete(name: presets[index].name)
+        rebuild()
+    }
+
     @objc private func chooseBackgroundImage() {
         let panel = NSOpenPanel()
         panel.allowedContentTypes = [.image]
@@ -499,6 +570,13 @@ final class VideoInspectorView: NSView {
         if document.project.zooms.contains(where: { $0.isAutomatic }) {
             add(button(L("Remove Automatic Zooms"), symbol: "trash", action: #selector(removeAutoZooms)))
         }
+        add(InspectorCard([
+            InspectorSwitchRow(title: L("Auto Zoom new recordings"),
+                               subtitle: L("Place zooms automatically the first time a recording opens"),
+                               isOn: VideoEditorWindowController.autoZoomNewRecordings) { on in
+                UserDefaults.standard.set(on, forKey: VideoEditorWindowController.autoZoomNewRecordingsKey)
+            },
+        ]))
         add(InspectorSectionHeader(L("Motion")))
         let transitions = VideoZoomStyle.Transition.allCases
         add(InspectorCard([

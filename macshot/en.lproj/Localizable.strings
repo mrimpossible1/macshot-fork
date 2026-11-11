@@ -32,7 +32,7 @@
 "Open from Clipboard" = "Open from Clipboard";
 "Pin from Clipboard" = "Pin from Clipboard";
 "Check for Updates..." = "Check for Updates...";
-"Quit macshot" = "Quit macshot";
+"Quit macshot" = "Quit MacShotty";
 "No recent captures" = "No recent captures";
 "Clear History" = "Clear History";
 
@@ -124,7 +124,7 @@
 "Record Microphone" = "Record Microphone";
 "Webcam Overlay" = "Webcam Overlay";
 "Camera Access Required" = "Camera Access Required";
-"macshot needs camera permission for the webcam overlay. Open System Settings to grant access." = "macshot needs camera permission for the webcam overlay. Open System Settings to grant access.";
+"macshot needs camera permission for the webcam overlay. Open System Settings to grant access." = "MacShotty needs camera permission for the webcam overlay. Open System Settings to grant access.";
 "Recording Settings" = "Recording Settings";
 "Webcam" = "Webcam";
 "Bottom Right" = "Bottom Right";
@@ -203,7 +203,7 @@
 "Copy to clipboard" = "Copy to clipboard";
 
 /* Preferences - General */
-"macshot Preferences" = "macshot Preferences";
+"macshot Preferences" = "MacShotty Preferences";
 "General" = "General";
 "Tools" = "Tools";
 "Recording" = "Recording";
@@ -228,7 +228,7 @@
 "Disable shadow outside selection" = "Disable shadow outside selection";
 "Use window title in saved filename" = "Use window title in saved filename";
 "Hide menu bar icon" = "Hide menu bar icon";
-"Hotkeys still work. To show the icon again, re-launch macshot." = "Hotkeys still work. To show the icon again, re-launch macshot.";
+"Hotkeys still work. To show the icon again, re-launch macshot." = "Hotkeys still work. To show the icon again, re-launch MacShotty.";
 "Check for updates automatically" = "Check for updates automatically";
 "Check for beta updates" = "Check for beta updates";
 "Thumbnail" = "Thumbnail";
@@ -239,7 +239,7 @@
 "Stack (keep all)" = "Stack (keep all)";
 "Replace (show only latest)" = "Replace (show only latest)";
 "Menu Bar Order" = "Menu Bar Order";
-"Choose the order of capture actions in the macshot menu bar menu." = "Choose the order of capture actions in the macshot menu bar menu.";
+"Choose the order of capture actions in the macshot menu bar menu." = "Choose the order of capture actions in the MacShotty menu bar menu.";
 "Move up" = "Move up";
 "Move down" = "Move down";
 "Output" = "Output";
@@ -348,11 +348,34 @@
 "Google Drive (images + videos)" = "Google Drive (images + videos)";
 "imgbb (images only)" = "imgbb (images only)";
 "S3-Compatible (images + videos)" = "S3-Compatible (images + videos)";
+"Dropbox (images + videos)" = "Dropbox (images + videos)";
+"Enter uploads the capture and copies the link" = "Enter uploads the capture and copies the link";
+"Hide emails, phone numbers and keys before uploading" = "Hide emails, phone numbers and keys before uploading";
+"Name Dropbox files from their text" = "Name Dropbox files from their text";
+"Both run on this Mac before the upload. Hidden text is covered with solid boxes, using the types picked in the capture toolbar's Auto-Redact menu (emails, phone numbers, cards and keys by default). Your local copy is not changed." = "Both run on this Mac before the upload. Hidden text is covered with solid boxes, using the types picked in the capture toolbar's Auto-Redact menu (emails, phone numbers, cards and keys by default). Your local copy is not changed.";
+"Copy link as:" = "Copy link as:";
+"Plain URL" = "Plain URL";
+"Markdown link" = "Markdown link";
+"Rich link (pastes as the file name)" = "Rich link (pastes as the file name)";
 "S3-Compatible Storage" = "S3-Compatible Storage";
 "Sign In with Google" = "Sign In with Google";
 "Sign Out" = "Sign Out";
 "Signed in" = "Signed in";
 "Not signed in" = "Not signed in";
+"Dropbox" = "Dropbox";
+"App Key:" = "App Key:";
+"App key from dropbox.com/developers/apps" = "App key from dropbox.com/developers/apps";
+"Add an App key first" = "Add an App key first";
+"Connect Dropbox" = "Connect Dropbox";
+"Connected" = "Connected";
+"Not connected" = "Not connected";
+"Disconnect" = "Disconnect";
+"Link:" = "Link:";
+"Public link (anyone with the link)" = "Public link (anyone with the link)";
+"Team-only link (Dropbox Business)" = "Team-only link (Dropbox Business)";
+"No link, just save the file" = "No link, just save the file";
+"Direct links (open the file itself, not the Dropbox page)" = "Direct links (open the file itself, not the Dropbox page)";
+"Captures are saved into this Dropbox folder (default /Share), which syncs to the Dropbox folder on your Mac, and the link is copied to your clipboard. Expired links stop working for everyone, you included, but the file stays in your Dropbox. Create a Dropbox app with Full Dropbox access and the files.content.write, files.content.read, sharing.write, sharing.read and account_info.read permissions, then paste its App key above." = "Captures are saved into this Dropbox folder (default /Share), which syncs to the Dropbox folder on your Mac, and the link is copied to your clipboard. Expired links stop working for everyone, you included, but the file stays in your Dropbox. Create a Dropbox app with Full Dropbox access and the files.content.write, files.content.read, sharing.write, sharing.read and account_info.read permissions, then paste its App key above.";
 "Folder:" = "Folder:";
 "Account:" = "Account:";
 "Test Connection" = "Test Connection";
@@ -378,9 +401,11 @@
 "Configure S3 in Preferences" = "Configure S3 in Preferences";
 "Sign in to Google Drive in Preferences" = "Sign in to Google Drive in Preferences";
 "Video upload requires Google Drive or S3" = "Video upload requires Google Drive or S3";
+"Video upload requires Google Drive, Dropbox or S3" = "Video upload requires Google Drive, Dropbox or S3";
+"Connect Dropbox in Settings" = "Connect Dropbox in Settings";
 
 /* Preferences - About */
-"macshot" = "macshot";
+"macshot" = "MacShotty";
 "Version %@ (%@)" = "Version %@ (%@)";
 "Made by" = "Made by";
 "Licensed under the GPLv3" = "Licensed under the GPLv3";
@@ -393,26 +418,27 @@
 "Copy an image or text to the clipboard first, then try again." = "Copy an image or text to the clipboard first, then try again.";
 "OK" = "OK";
 "Accessibility Access Required" = "Accessibility Access Required";
-"macshot needs Accessibility permission to auto-scroll other apps. Please grant access in System Settings, then try again." = "macshot needs Accessibility permission to auto-scroll other apps. Please grant access in System Settings, then try again.";
-"macshot needs Accessibility permission for scroll capture. Please grant access in System Settings, then try again." = "macshot needs Accessibility permission for scroll capture. Please grant access in System Settings, then try again.";
+"macshot needs Accessibility permission to auto-scroll other apps. Please grant access in System Settings, then try again." = "MacShotty needs Accessibility permission to auto-scroll other apps. Please grant access in System Settings, then try again.";
+"macshot needs Accessibility permission for scroll capture. Please grant access in System Settings, then try again." = "MacShotty needs Accessibility permission for scroll capture. Please grant access in System Settings, then try again.";
 "Open Settings" = "Open Settings";
 "Cancel" = "Cancel";
 "Microphone Access Required" = "Microphone Access Required";
-"macshot needs microphone permission to record voice audio. Open System Settings to grant access." = "macshot needs microphone permission to record voice audio. Open System Settings to grant access.";
+"macshot needs microphone permission to record voice audio. Open System Settings to grant access." = "MacShotty needs microphone permission to record voice audio. Open System Settings to grant access.";
 "Upload to Google Drive?" = "Upload to Google Drive?";
 "Upload to S3?" = "Upload to S3?";
+"Upload to Dropbox?" = "Upload to Dropbox?";
 "Upload to imgbb.com?" = "Upload to imgbb.com?";
 "Your screenshot will be uploaded." = "Your screenshot will be uploaded.";
 
 /* Permission Onboarding */
-"Welcome to macshot" = "Welcome to macshot";
-"Welcome back to macshot" = "Welcome back to macshot";
+"Welcome to macshot" = "Welcome to MacShotty";
+"Welcome back to macshot" = "Welcome back to MacShotty";
 "Turn Screen Recording back on" = "Turn Screen Recording back on";
-"After some updates, macOS asks you to allow macshot again. Your settings and captures are safe. If macshot is already in the list, select it, click the minus button (−) to remove it, then click the plus button (+) and add macshot again." = "After some updates, macOS asks you to allow macshot again. Your settings and captures are safe. If macshot is already in the list, select it, click the minus button (−) to remove it, then click the plus button (+) and add macshot again.";
-"macshot needs one permission" = "macshot needs one permission";
+"After some updates, macOS asks you to allow macshot again. Your settings and captures are safe. If macshot is already in the list, select it, click the minus button (−) to remove it, then click the plus button (+) and add macshot again." = "After some updates, macOS asks you to allow MacShotty again. Your settings and captures are safe. If MacShotty is already in the list, select it, click the minus button (−) to remove it, then click the plus button (+) and add MacShotty again.";
+"macshot needs one permission" = "MacShotty needs one permission";
 "Screen Recording not yet granted" = "Screen Recording not yet granted";
 "Screen Recording granted!" = "Screen Recording granted!";
-"Enable macshot, then try taking a screenshot" = "Enable macshot, then try taking a screenshot";
+"Enable macshot, then try taking a screenshot" = "Enable MacShotty, then try taking a screenshot";
 "Open Screen Recording Settings" = "Open Screen Recording Settings";
 "Continue" = "Continue";
 
@@ -446,7 +472,7 @@
 "Path copied!" = "Path copied!";
 
 /* Video Editor */
-"macshot Video Editor" = "macshot Video Editor";
+"macshot Video Editor" = "MacShotty Video Editor";
 "%@ selected" = "%@ selected";
 "Exporting..." = "Exporting...";
 "Export failed" = "Export failed";
@@ -468,6 +494,14 @@
 
 /* Effects Picker (Adjust popover) */
 "Presets" = "Presets";
+"No saved presets yet" = "No saved presets yet";
+"Apply a preset…" = "Apply a preset…";
+"Save Look as Preset…" = "Save Look as Preset…";
+"Save Look as Preset" = "Save Look as Preset";
+"Saves the background, frame, pointer, zoom, keystroke, camera and caption settings. A preset with the same name is replaced." = "Saves the background, frame, pointer, zoom, keystroke, camera and caption settings. A preset with the same name is replaced.";
+"Preset name" = "Preset name";
+"Delete a Preset…" = "Delete a Preset…";
+"Delete a Preset" = "Delete a Preset";
 "Adjustments" = "Adjustments";
 "Brightness" = "Brightness";
 "Contrast" = "Contrast";
@@ -492,8 +526,8 @@
 
 /* Recording — Input Monitoring Permission */
 "Input Monitoring Required" = "Input Monitoring Required";
-"macshot needs Input Monitoring permission to highlight mouse clicks or show keystrokes during recording. Please grant access in System Settings, then try again." = "macshot needs Input Monitoring permission to highlight mouse clicks or show keystrokes during recording. Please grant access in System Settings, then try again.";
-"macshot needs Accessibility permission to snap to individual interface elements. Please grant access in System Settings, then try again." = "macshot needs Accessibility permission to snap to individual interface elements. Please grant access in System Settings, then try again.";
+"macshot needs Input Monitoring permission to highlight mouse clicks or show keystrokes during recording. Please grant access in System Settings, then try again." = "MacShotty needs Input Monitoring permission to highlight mouse clicks or show keystrokes during recording. Please grant access in System Settings, then try again.";
+"macshot needs Accessibility permission to snap to individual interface elements. Please grant access in System Settings, then try again." = "MacShotty needs Accessibility permission to snap to individual interface elements. Please grant access in System Settings, then try again.";
 
 /* Recording — Keystroke Overlay */
 "Show Keystrokes" = "Show Keystrokes";
@@ -508,7 +542,7 @@
 
 /* Recently added strings */
 "Settings..." = "Settings...";
-"macshot Settings" = "macshot Settings";
+"macshot Settings" = "MacShotty Settings";
 "Also open in Editor" = "Also open in Editor";
 "Open in Editor right after selection" = "Open in Editor right after selection";
 "Close editor after copying" = "Close editor after copying";
@@ -563,13 +597,13 @@
 "Clear History?" = "Clear History?";
 "This will permanently delete all screenshots from history." = "This will permanently delete all screenshots from history.";
 "Click \"Set\" and press a key combination with at least one modifier (⌘, ⌥, ⌃, ⇧) to set a shortcut." = "Click \"Set\" and press a key combination with at least one modifier (⌘, ⌥, ⌃, ⇧) to set a shortcut.";
-"Files are uploaded to this folder in your Google Drive. Leave empty to use \"macshot\". macshot can only use folders it created itself, so a folder you made in Drive with the same name won't be reused. A new one is created instead. Everything stays private and nothing is shared publicly." = "Files are uploaded to this folder in your Google Drive. Leave empty to use \"macshot\". macshot can only use folders it created itself, so a folder you made in Drive with the same name won't be reused. A new one is created instead. Everything stays private and nothing is shared publicly.";
+"Files are uploaded to this folder in your Google Drive. Leave empty to use \"macshot\". macshot can only use folders it created itself, so a folder you made in Drive with the same name won't be reused. A new one is created instead. Everything stays private and nothing is shared publicly." = "Files are uploaded to this folder in your Google Drive. Leave empty to use \"MacShotty\". MacShotty can only use folders it created itself, so a folder you made in Drive with the same name won't be reused. A new one is created instead. Everything stays private and nothing is shared publicly.";
 
 "Pressure" = "Pressure";
 
 /* Added for v4.1.0-beta.3 — video editor, effects, open-video, shortcuts help */
 "Open Video..." = "Open Video...";
-"Choose a video to open in macshot editor" = "Choose a video to open in macshot editor";
+"Choose a video to open in macshot editor" = "Choose a video to open in MacShotty editor";
 "Click to add effects" = "Click to add effects";
 "Add Zoom" = "Add Zoom";
 "Add Censor" = "Add Censor";
@@ -648,7 +682,7 @@
 "Stop the current recording" = "Stop the current recording";
 "Supported URL Scheme Commands" = "Supported URL Scheme Commands";
 "The file extension is appended automatically. Slashes and colons in {window} become dashes." = "The file extension is appended automatically. Slashes and colons in {window} become dashes.";
-"Trigger macshot from Raycast, Alfred, Shortcuts, or any tool that opens URLs." = "Trigger macshot from Raycast, Alfred, Shortcuts, or any tool that opens URLs.";
+"Trigger macshot from Raycast, Alfred, Shortcuts, or any tool that opens URLs." = "Trigger MacShotty from Raycast, Alfred, Shortcuts, or any tool that opens URLs.";
 "URL scheme info" = "URL scheme info";
 "sec (0 = never)" = "sec (0 = never)";
 "Settings" = "Settings";
@@ -659,7 +693,7 @@
 "Export Settings…" = "Export Settings…";
 "Import Settings…" = "Import Settings…";
 "Reveal Settings File in Finder" = "Reveal Settings File in Finder";
-"Export your preferences to a file to move them to another Mac or a clean install. Upload credentials, your save folder, and screenshot history are not included. Settings are stored inside macshot's app container." = "Export your preferences to a file to move them to another Mac or a clean install. Upload credentials, your save folder, and screenshot history are not included. Settings are stored inside macshot's app container.";
+"Export your preferences to a file to move them to another Mac or a clean install. Upload credentials, your save folder, and screenshot history are not included. Settings are stored inside macshot's app container." = "Export your preferences to a file to move them to another Mac or a clean install. Upload credentials, your save folder, and screenshot history are not included. Settings are stored inside MacShotty's app container.";
 "Export Settings" = "Export Settings";
 "Import Settings" = "Import Settings";
 "Import failed" = "Import failed";
@@ -670,12 +704,12 @@
 "Relaunch Now" = "Relaunch Now";
 "Replace your current settings?" = "Replace your current settings?";
 "Importing will replace your current preferences with the ones in this file. Your save folder, upload credentials, and screenshot history are kept. This cannot be undone." = "Importing will replace your current preferences with the ones in this file. Your save folder, upload credentials, and screenshot history are kept. This cannot be undone.";
-"%d settings were applied. Relaunch macshot to apply all changes." = "%d settings were applied. Relaunch macshot to apply all changes.";
+"%d settings were applied. Relaunch macshot to apply all changes." = "%d settings were applied. Relaunch MacShotty to apply all changes.";
 "A few large items were too big to include. Everything else was saved." = "A few large items were too big to include. Everything else was saved.";
 "Your custom Beautify background image was too large to include. Everything else was saved." = "Your custom Beautify background image was too large to include. Everything else was saved.";
-"This file is not a valid macshot settings file." = "This file is not a valid macshot settings file.";
+"This file is not a valid macshot settings file." = "This file is not a valid MacShotty settings file.";
 "This settings file contains no settings." = "This settings file contains no settings.";
-"This settings file was made by a newer version of macshot. Please update macshot first." = "This settings file was made by a newer version of macshot. Please update macshot first.";
+"This settings file was made by a newer version of macshot. Please update macshot first." = "This settings file was made by a newer version of MacShotty. Please update MacShotty first.";
 
 /* URL scheme: ocr-translate (issue #283) */
 "Capture, translate, and overlay the text on the image" = "Capture, translate, and overlay the text on the image";
@@ -728,7 +762,7 @@
 "Apply Default Zoom to All" = "Apply Default Zoom to All";
 "Auto" = "Auto";
 "Auto Zoom" = "Auto Zoom";
-"Auto Zoom needs pointer data, which macshot records with every new recording. You can still add zooms by double-clicking the zoom lane." = "Auto Zoom needs pointer data, which macshot records with every new recording. You can still add zooms by double-clicking the zoom lane.";
+"Auto Zoom needs pointer data, which macshot records with every new recording. You can still add zooms by double-clicking the zoom lane." = "Auto Zoom needs pointer data, which MacShotty records with every new recording. You can still add zooms by double-clicking the zoom lane.";
 "Background blur" = "Background blur";
 "Background color" = "Background color";
 "Background, padding, rounded corners and shadow" = "Background, padding, rounded corners and shadow";
@@ -814,6 +848,8 @@
 "Regenerate Captions" = "Regenerate Captions";
 "Regular" = "Regular";
 "Remove Automatic Zooms" = "Remove Automatic Zooms";
+"Auto Zoom new recordings" = "Auto Zoom new recordings";
+"Place zooms automatically the first time a recording opens" = "Place zooms automatically the first time a recording opens";
 "Remove Captions" = "Remove Captions";
 "Removes %.1f seconds from the video. Drag its edges on the timeline to adjust." = "Removes %.1f seconds from the video. Drag its edges on the timeline to adjust.";
 "Return to start at the end" = "Return to start at the end";
@@ -829,7 +865,7 @@
 "Shrink during zooms" = "Shrink during zooms";
 "Smoothing" = "Smoothing";
 "Snappy" = "Snappy";
-"Speech recognition is turned off for macshot in System Settings › Privacy & Security." = "Speech recognition is turned off for macshot in System Settings › Privacy & Security.";
+"Speech recognition is turned off for macshot in System Settings › Privacy & Security." = "Speech recognition is turned off for MacShotty in System Settings › Privacy & Security.";
 "Speed" = "Speed";
 "Spotlight" = "Spotlight";
 "Square" = "Square";
@@ -839,12 +875,12 @@
 "The recording's audio could not be read." = "The recording's audio could not be read.";
 "This recording already shows the pointer in its pixels, so it can't be restyled. Zooms can still follow it." = "This recording already shows the pointer in its pixels, so it can't be restyled. Zooms can still follow it.";
 "This recording has no audio to transcribe." = "This recording has no audio to transcribe.";
-"This video has no recorded pointer data. Recordings made with macshot that open in the editor let you restyle, smooth and resize the pointer after recording." = "This video has no recorded pointer data. Recordings made with macshot that open in the editor let you restyle, smooth and resize the pointer after recording.";
+"This video has no recorded pointer data. Recordings made with macshot that open in the editor let you restyle, smooth and resize the pointer after recording." = "This video has no recorded pointer data. Recordings made with MacShotty that open in the editor let you restyle, smooth and resize the pointer after recording.";
 "Title" = "Title";
 "Transcribing…" = "Transcribing…";
 "Transition" = "Transition";
-"Turn on Show Keystrokes before recording. macshot then records them separately so you can style them here." = "Turn on Show Keystrokes before recording. macshot then records them separately so you can style them here.";
-"Turn on the camera before recording. macshot records it separately so you can move, resize, restyle or hide it here, and shrink it during zooms." = "Turn on the camera before recording. macshot records it separately so you can move, resize, restyle or hide it here, and shrink it during zooms.";
+"Turn on Show Keystrokes before recording. macshot then records them separately so you can style them here." = "Turn on Show Keystrokes before recording. MacShotty then records them separately so you can style them here.";
+"Turn on the camera before recording. macshot records it separately so you can move, resize, restyle or hide it here, and shrink it during zooms." = "Turn on the camera before recording. MacShotty records it separately so you can move, resize, restyle or hide it here, and shrink it during zooms.";
 "Use Solid to hide sensitive information: blur and pixelation can sometimes be reversed." = "Use Solid to hide sensitive information: blur and pixelation can sometimes be reversed.";
 "Visibility" = "Visibility";
 "Wallpaper" = "Wallpaper";
@@ -860,3 +896,29 @@
 
 "Snap webcam to corners when moved" = "Snap webcam to corners when moved";
 "Search emoji" = "Search emoji";
+"Never" = "Never";
+"After 1 day" = "After 1 day";
+"After 7 days" = "After 7 days";
+"After 30 days" = "After 30 days";
+"Link expires:" = "Link expires:";
+"Each month, move last month's files into Archive/YYYY-MM" = "Each month, move last month's files into Archive/YYYY-MM";
+"Before / After (Last 2 Captures)" = "Before / After (Last 2 Captures)";
+"Side-by-Side Image" = "Side-by-Side Image";
+"Animated GIF…" = "Animated GIF…";
+"Take two captures first. Your latest capture is After and the one before it is Before." = "Take two captures first. Your latest capture is After and the one before it is Before.";
+"Couldn't make the before/after image." = "Couldn't make the before/after image.";
+"Couldn't make the before/after GIF." = "Couldn't make the before/after GIF.";
+"Before/after GIF ready" = "Before/after GIF ready";
+"Fades between your last two captures (%@)." = "Fades between your last two captures (%@).";
+"Save…" = "Save…";
+"Upload to Dropbox & Copy Link" = "Upload to Dropbox & Copy Link";
+"Couldn't save the GIF: %@" = "Couldn't save the GIF: %@";
+"Captures are saved into this Dropbox folder (default /Share), which syncs to the Dropbox folder on your Mac, and the link is copied to your clipboard. Expired links stop working for everyone, you included, but the file stays in your Dropbox." = "Captures are saved into this Dropbox folder (default /Share), which syncs to the Dropbox folder on your Mac, and the link is copied to your clipboard. Expired links stop working for everyone, you included, but the file stays in your Dropbox.";
+"Capture Area (All Tools)" = "Capture Area (All Tools)";
+"Copy link (upload)" = "Copy link (upload)";
+"All tools (open in editor)" = "All tools (open in editor)";
+"Simple toolbar for Capture Area and Capture Screen (six tools, Copy, Link, Save)" = "Simple toolbar for Capture Area and Capture Screen (six tools, Copy, Link, Save)";
+"Capture Area and Capture Screen copy right away and show the thumbnail (click it to mark up)" = "Capture Area and Capture Screen copy right away and show the thumbnail (click it to mark up)";
+"Fewer tools" = "Fewer tools";
+"More tools and options" = "More tools and options";
+"Simple markup toolbar: six tools, Copy, Link, Save (the … button shows everything)" = "Simple markup toolbar: six tools, Copy, Link, Save (the … button shows everything)";

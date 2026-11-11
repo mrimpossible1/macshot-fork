@@ -122,6 +122,13 @@ class SettingsWindowController: NSWindowController, NSToolbarDelegate, NSWindowD
     private var gdriveSignInBtn: NSButton!
     private var gdriveStatusLabel: NSTextField!
     private var gdriveFolderField: NSTextField!
+    // Dropbox controls
+    private var dropboxAppKeyField: NSTextField!
+    private var dropboxSignInBtn: NSButton!
+    private var dropboxStatusLabel: NSTextField!
+    private var dropboxFolderField: NSTextField!
+    private var dropboxLinkPopup: NSPopUpButton!
+    private var dropboxDirectCheckbox: NSButton!
     // S3 tab controls
     private var s3EndpointField: NSTextField!
     private var s3RegionField: NSTextField!
@@ -230,11 +237,11 @@ class SettingsWindowController: NSWindowController, NSToolbarDelegate, NSWindowD
         madeBy.textColor = .secondaryLabelColor
         madeBy.translatesAutoresizingMaskIntoConstraints = false
 
-        let linkBtn = NSButton(title: "github.com/sw33tLie/macshot", target: self, action: #selector(openGitHub))
+        let linkBtn = NSButton(title: "github.com/mrimpossible1/macshot-fork", target: self, action: #selector(openGitHub))
         linkBtn.bezelStyle = .inline
         linkBtn.isBordered = false
         linkBtn.font = NSFont.systemFont(ofSize: 11)
-        linkBtn.attributedTitle = NSAttributedString(string: "github.com/sw33tLie/macshot", attributes: [
+        linkBtn.attributedTitle = NSAttributedString(string: "github.com/mrimpossible1/macshot-fork", attributes: [
             .font: NSFont.systemFont(ofSize: 11),
             .foregroundColor: NSColor.linkColor,
             .underlineStyle: NSUnderlineStyle.single.rawValue,
@@ -712,7 +719,7 @@ class SettingsWindowController: NSWindowController, NSToolbarDelegate, NSWindowD
     @objc private func revealSettingsFileClicked(_ sender: NSButton) {
         let prefsDir = FileManager.default.urls(for: .libraryDirectory, in: .userDomainMask).first!
             .appendingPathComponent("Preferences", isDirectory: true)
-        let bundleID = Bundle.main.bundleIdentifier ?? "com.sw33tlie.macshot.macshot"
+        let bundleID = Bundle.main.bundleIdentifier ?? "com.mrimpossible1.macshotty"
         let plist = prefsDir.appendingPathComponent("\(bundleID).plist")
         if FileManager.default.fileExists(atPath: plist.path) {
             NSWorkspace.shared.activateFileViewerSelecting([plist])
@@ -891,6 +898,18 @@ class SettingsWindowController: NSWindowController, NSToolbarDelegate, NSWindowD
         stack.setCustomSpacing(6, after: stack.arrangedSubviews.last!)
 
         stack.addArrangedSubview(indented(hideCaptureInstructionsCheckbox))
+        stack.setCustomSpacing(6, after: stack.arrangedSubviews.last!)
+
+        let instantCheckbox = NSButton(checkboxWithTitle: L("Capture Area and Capture Screen copy right away and show the thumbnail (click it to mark up)"),
+                                       target: self, action: #selector(instantCaptureChanged(_:)))
+        instantCheckbox.state = AppDelegate.instantCapture ? .on : .off
+        stack.addArrangedSubview(indented(instantCheckbox))
+        stack.setCustomSpacing(6, after: stack.arrangedSubviews.last!)
+
+        let simpleToolbarCheckbox = NSButton(checkboxWithTitle: L("Simple markup toolbar: six tools, Copy, Link, Save (the … button shows everything)"),
+                                             target: self, action: #selector(simpleToolbarChanged(_:)))
+        simpleToolbarCheckbox.state = AppDelegate.simpleCaptureToolbar ? .on : .off
+        stack.addArrangedSubview(indented(simpleToolbarCheckbox))
         stack.setCustomSpacing(6, after: stack.arrangedSubviews.last!)
 
         stack.addArrangedSubview(indented(disableSelectionShadowCheckbox))
@@ -1952,16 +1971,109 @@ class SettingsWindowController: NSWindowController, NSToolbarDelegate, NSWindowD
         stack.setCustomSpacing(10, after: stack.arrangedSubviews.last!)
 
         providerPopup = NSPopUpButton()
-        providerPopup.addItems(withTitles: [L("imgbb (images only)"), L("Google Drive (images + videos)"), L("S3-Compatible (images + videos)")])
+        providerPopup.addItems(withTitles: [L("imgbb (images only)"), L("Google Drive (images + videos)"), L("S3-Compatible (images + videos)"), L("Dropbox (images + videos)")])
         let currentProvider = UserDefaults.standard.string(forKey: "uploadProvider") ?? "imgbb"
         switch currentProvider {
         case "gdrive": providerPopup.selectItem(at: 1)
         case "s3": providerPopup.selectItem(at: 2)
+        case "dropbox": providerPopup.selectItem(at: 3)
         default: providerPopup.selectItem(at: 0)
         }
         providerPopup.target = self
         providerPopup.action = #selector(uploadProviderChanged(_:))
         stack.addArrangedSubview(labeledRow(L("Provider:"), controls: [providerPopup]))
+        stack.setCustomSpacing(6, after: stack.arrangedSubviews.last!)
+
+        let enterUploadsCheckbox = NSButton(checkboxWithTitle: L("Enter uploads the capture and copies the link"), target: self, action: #selector(quickCaptureUploadsChanged(_:)))
+        enterUploadsCheckbox.state = UserDefaults.standard.bool(forKey: "quickCaptureUploads") ? .on : .off
+        stack.addArrangedSubview(indented(enterUploadsCheckbox))
+        stack.setCustomSpacing(6, after: stack.arrangedSubviews.last!)
+
+        let redactCheckbox = NSButton(checkboxWithTitle: L("Hide emails, phone numbers and keys before uploading"), target: self, action: #selector(uploadAutoRedactChanged(_:)))
+        redactCheckbox.state = UploadPreparation.autoRedact ? .on : .off
+        stack.addArrangedSubview(indented(redactCheckbox))
+        stack.setCustomSpacing(6, after: stack.arrangedSubviews.last!)
+
+        let namesCheckbox = NSButton(checkboxWithTitle: L("Name Dropbox files from their text"), target: self, action: #selector(uploadReadableNamesChanged(_:)))
+        namesCheckbox.state = UploadPreparation.readableNames ? .on : .off
+        stack.addArrangedSubview(indented(namesCheckbox))
+        stack.setCustomSpacing(4, after: stack.arrangedSubviews.last!)
+
+        let prepNote = NSTextField(wrappingLabelWithString: L("Both run on this Mac before the upload. Hidden text is covered with solid boxes, using the types picked in the capture toolbar's Auto-Redact menu (emails, phone numbers, cards and keys by default). Your local copy is not changed."))
+        prepNote.font = NSFont.systemFont(ofSize: 10)
+        prepNote.textColor = .secondaryLabelColor
+        stack.addArrangedSubview(indented(prepNote))
+        stack.setCustomSpacing(10, after: stack.arrangedSubviews.last!)
+
+        let linkFormatPopup = NSPopUpButton()
+        linkFormatPopup.addItems(withTitles: [L("Plain URL"), L("Markdown link"), L("Rich link (pastes as the file name)")])
+        linkFormatPopup.selectItem(at: UploadLinkClipboard.Format.allCases.firstIndex(of: UploadLinkClipboard.format) ?? 0)
+        linkFormatPopup.target = self
+        linkFormatPopup.action = #selector(uploadLinkFormatChanged(_:))
+        stack.addArrangedSubview(labeledRow(L("Copy link as:"), controls: [linkFormatPopup]))
+        stack.setCustomSpacing(16, after: stack.arrangedSubviews.last!)
+
+        // ── Dropbox ──
+        stack.addArrangedSubview(sectionHeader(L("Dropbox")))
+        stack.setCustomSpacing(10, after: stack.arrangedSubviews.last!)
+
+        dropboxAppKeyField = NSTextField()
+        dropboxAppKeyField.placeholderString = L("App key from dropbox.com/developers/apps")
+        dropboxAppKeyField.font = NSFont.monospacedSystemFont(ofSize: 11, weight: .regular)
+        dropboxAppKeyField.stringValue = UserDefaults.standard.string(forKey: "dropboxAppKey") ?? ""
+        dropboxAppKeyField.target = self
+        dropboxAppKeyField.action = #selector(dropboxFieldChanged(_:))
+        // MacShotty has its own Dropbox app built in, so the key field stays hidden.
+
+        dropboxStatusLabel = NSTextField(labelWithString: "")
+        dropboxStatusLabel.font = NSFont.systemFont(ofSize: 11)
+        dropboxStatusLabel.textColor = .secondaryLabelColor
+        dropboxSignInBtn = NSButton(title: L("Connect Dropbox"), target: self, action: #selector(dropboxSignInTapped(_:)))
+        dropboxSignInBtn.bezelStyle = .rounded
+        updateDropboxStatus()
+        stack.addArrangedSubview(labeledRow(L("Account:"), controls: [dropboxStatusLabel]))
+        stack.addArrangedSubview(indented(dropboxSignInBtn))
+        stack.setCustomSpacing(10, after: stack.arrangedSubviews.last!)
+
+        dropboxFolderField = NSTextField()
+        dropboxFolderField.placeholderString = DropboxUploader.defaultFolder
+        dropboxFolderField.font = NSFont.monospacedSystemFont(ofSize: 11, weight: .regular)
+        dropboxFolderField.stringValue = UserDefaults.standard.string(forKey: "dropboxFolder") ?? ""
+        dropboxFolderField.target = self
+        dropboxFolderField.action = #selector(dropboxFieldChanged(_:))
+        stack.addArrangedSubview(labeledRow(L("Folder:"), controls: [dropboxFolderField]))
+
+        dropboxLinkPopup = NSPopUpButton()
+        dropboxLinkPopup.addItems(withTitles: [L("Public link (anyone with the link)"), L("Team-only link (Dropbox Business)"), L("No link, just save the file")])
+        switch DropboxUploader.shared.linkAudience {
+        case .publicLink: dropboxLinkPopup.selectItem(at: 0)
+        case .team: dropboxLinkPopup.selectItem(at: 1)
+        case .none: dropboxLinkPopup.selectItem(at: 2)
+        }
+        dropboxLinkPopup.target = self
+        dropboxLinkPopup.action = #selector(dropboxLinkChanged(_:))
+        stack.addArrangedSubview(labeledRow(L("Link:"), controls: [dropboxLinkPopup]))
+
+        let expiryPopup = NSPopUpButton()
+        expiryPopup.addItems(withTitles: [L("Never"), L("After 1 day"), L("After 7 days"), L("After 30 days")])
+        expiryPopup.selectItem(at: DropboxUploader.expiryChoices.firstIndex(of: DropboxUploader.shared.linkExpiryDays) ?? 2)
+        expiryPopup.target = self
+        expiryPopup.action = #selector(dropboxExpiryChanged(_:))
+        stack.addArrangedSubview(labeledRow(L("Link expires:"), controls: [expiryPopup]))
+
+        dropboxDirectCheckbox = NSButton(checkboxWithTitle: L("Direct links (open the file itself, not the Dropbox page)"), target: self, action: #selector(dropboxDirectChanged(_:)))
+        dropboxDirectCheckbox.state = UserDefaults.standard.bool(forKey: "dropboxDirectLinks") ? .on : .off
+        stack.addArrangedSubview(indented(dropboxDirectCheckbox))
+
+        let archiveCheckbox = NSButton(checkboxWithTitle: L("Each month, move last month's files into Archive/YYYY-MM"), target: self, action: #selector(dropboxArchiveChanged(_:)))
+        archiveCheckbox.state = DropboxUploader.shared.monthlyArchive ? .on : .off
+        stack.addArrangedSubview(indented(archiveCheckbox))
+        stack.setCustomSpacing(4, after: stack.arrangedSubviews.last!)
+
+        let dropboxNote = NSTextField(wrappingLabelWithString: L("Captures are saved into this Dropbox folder (default /Share), which syncs to the Dropbox folder on your Mac, and the link is copied to your clipboard. Expired links stop working for everyone, you included, but the file stays in your Dropbox."))
+        dropboxNote.font = NSFont.systemFont(ofSize: 10)
+        dropboxNote.textColor = .secondaryLabelColor
+        stack.addArrangedSubview(indented(dropboxNote))
         stack.setCustomSpacing(16, after: stack.arrangedSubviews.last!)
 
         // ── Google Drive ──
@@ -2239,7 +2351,7 @@ class SettingsWindowController: NSWindowController, NSToolbarDelegate, NSWindowD
                 var lines: [String] = []
                 let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "?"
                 let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "?"
-                lines.append("macshot \(version) (\(build))")
+                lines.append("MacShotty \(version) (\(build)), a fork of macshot")
                 lines.append("macOS \(ProcessInfo.processInfo.operatingSystemVersionString)")
                 lines.append("")
                 lines.append("=== NSScreen Info ===")
@@ -2319,9 +2431,97 @@ class SettingsWindowController: NSWindowController, NSToolbarDelegate, NSWindowD
         switch sender.indexOfSelectedItem {
         case 1: provider = "gdrive"
         case 2: provider = "s3"
+        case 3: provider = "dropbox"
         default: provider = "imgbb"
         }
         UserDefaults.standard.set(provider, forKey: "uploadProvider")
+    }
+
+    private func updateDropboxStatus() {
+        if DropboxUploader.shared.isSignedIn {
+            dropboxStatusLabel?.stringValue = DropboxUploader.shared.accountName ?? L("Connected")
+            dropboxStatusLabel?.textColor = .labelColor
+            dropboxSignInBtn?.title = L("Disconnect")
+        } else {
+            dropboxStatusLabel?.stringValue = DropboxUploader.shared.appKey.isEmpty ? L("Add an App key first") : L("Not connected")
+            dropboxStatusLabel?.textColor = .secondaryLabelColor
+            dropboxSignInBtn?.title = L("Connect Dropbox")
+        }
+    }
+
+    @objc private func dropboxFieldChanged(_ sender: NSTextField) {
+        let newKey = dropboxAppKeyField.stringValue.trimmingCharacters(in: .whitespacesAndNewlines)
+        // A refresh token only works with the app that issued it.
+        if newKey != (UserDefaults.standard.string(forKey: "dropboxAppKey") ?? ""), DropboxUploader.shared.isSignedIn { DropboxUploader.shared.signOut() }
+        UserDefaults.standard.set(newKey, forKey: "dropboxAppKey")
+        UserDefaults.standard.set(dropboxFolderField.stringValue, forKey: "dropboxFolder")
+        updateDropboxStatus()
+    }
+
+    @objc private func dropboxLinkChanged(_ sender: NSPopUpButton) {
+        let audience: DropboxUploader.LinkAudience
+        switch sender.indexOfSelectedItem {
+        case 1: audience = .team
+        case 2: audience = .none
+        default: audience = .publicLink
+        }
+        UserDefaults.standard.set(audience.rawValue, forKey: "dropboxLinkAudience")
+    }
+
+    @objc private func uploadAutoRedactChanged(_ sender: NSButton) {
+        UserDefaults.standard.set(sender.state == .on, forKey: UploadPreparation.autoRedactKey)
+    }
+
+    @objc private func uploadReadableNamesChanged(_ sender: NSButton) {
+        UserDefaults.standard.set(sender.state == .on, forKey: UploadPreparation.readableNamesKey)
+    }
+
+    @objc private func uploadLinkFormatChanged(_ sender: NSPopUpButton) {
+        let formats = UploadLinkClipboard.Format.allCases
+        let index = sender.indexOfSelectedItem
+        guard index >= 0, index < formats.count else { return }
+        UserDefaults.standard.set(formats[index].rawValue, forKey: UploadLinkClipboard.defaultsKey)
+    }
+
+    @objc private func quickCaptureUploadsChanged(_ sender: NSButton) {
+        UserDefaults.standard.set(sender.state == .on, forKey: "quickCaptureUploads")
+    }
+
+    @objc private func dropboxArchiveChanged(_ sender: NSButton) {
+        UserDefaults.standard.set(sender.state == .on, forKey: DropboxUploader.monthlyArchiveKey)
+    }
+
+    @objc private func dropboxExpiryChanged(_ sender: NSPopUpButton) {
+        let choices = DropboxUploader.expiryChoices
+        guard choices.indices.contains(sender.indexOfSelectedItem) else { return }
+        UserDefaults.standard.set(choices[sender.indexOfSelectedItem], forKey: DropboxUploader.linkExpiryKey)
+    }
+
+    @objc private func dropboxDirectChanged(_ sender: NSButton) {
+        UserDefaults.standard.set(sender.state == .on, forKey: "dropboxDirectLinks")
+    }
+
+    @objc private func dropboxSignInTapped(_ sender: NSButton) {
+        // Pick up an App key that was pasted but not yet committed with Return.
+        if let field = dropboxAppKeyField { dropboxFieldChanged(field) }
+        if DropboxUploader.shared.isSignedIn {
+            DropboxUploader.shared.signOut()
+            updateDropboxStatus()
+            return
+        }
+        guard !DropboxUploader.shared.appKey.isEmpty else {
+            updateDropboxStatus()
+            NSSound.beep()
+            return
+        }
+        DropboxUploader.shared.signIn(from: window) { [weak self] success in
+            guard let self else { return }
+            if success { self.window?.makeKeyAndOrderFront(nil) }
+            self.updateDropboxStatus()
+            if success {
+                DropboxUploader.shared.fetchAccountName { [weak self] in self?.updateDropboxStatus() }
+            }
+        }
     }
 
     @objc private func gdriveSignInTapped(_ sender: NSButton) {
@@ -2668,7 +2868,7 @@ class SettingsWindowController: NSWindowController, NSToolbarDelegate, NSWindowD
         let stacking = UserDefaults.standard.object(forKey: "thumbnailStacking") as? Bool ?? true
         thumbnailStackingPopup.selectItem(at: stacking ? 0 : 1)
 
-        let thumbnailCorner = UserDefaults.standard.string(forKey: "thumbnailCorner") ?? "bottomRight"
+        let thumbnailCorner = UserDefaults.standard.string(forKey: "thumbnailCorner") ?? "bottomLeft"
         switch thumbnailCorner {
         case "bottomLeft": thumbnailCornerPopup.selectItem(at: 1)
         case "topRight": thumbnailCornerPopup.selectItem(at: 2)
@@ -2697,7 +2897,7 @@ class SettingsWindowController: NSWindowController, NSToolbarDelegate, NSWindowD
 
         captureCursorCheckbox.state = UserDefaults.standard.bool(forKey: "captureCursor") ? .on : .off
         doubleClickToCopyCheckbox.state = (UserDefaults.standard.object(forKey: "doubleClickToCopy") as? Bool ?? true) ? .on : .off
-        hideCaptureInstructionsCheckbox.state = UserDefaults.standard.bool(forKey: "hideCaptureInstructions") ? .on : .off
+        hideCaptureInstructionsCheckbox.state = (UserDefaults.standard.object(forKey: "hideCaptureInstructions") as? Bool ?? true) ? .on : .off
         disableSelectionShadowCheckbox.state = UserDefaults.standard.bool(forKey: "disableSelectionOutsideShadow") ? .on : .off
         filenameTemplateField.stringValue = UserDefaults.standard.string(forKey: FilenameFormatter.userDefaultsKey) ?? FilenameFormatter.defaultTemplate
         updateFilenamePreview()
@@ -2908,7 +3108,7 @@ class SettingsWindowController: NSWindowController, NSToolbarDelegate, NSWindowD
         LanguageManager.shared.currentLanguage = languages[idx].code
     }
     @objc private func openGitHub() {
-        if let url = URL(string: "https://github.com/sw33tLie/macshot") { NSWorkspace.shared.open(url) }
+        if let url = URL(string: "https://github.com/mrimpossible1/macshot-fork") { NSWorkspace.shared.open(url) }
     }
     @objc private func imageFormatChanged(_ sender: NSPopUpButton) {
         guard let raw = sender.selectedItem?.representedObject as? String,
@@ -3184,6 +3384,14 @@ class SettingsWindowController: NSWindowController, NSToolbarDelegate, NSWindowD
     @objc private func doubleClickToCopyChanged(_ sender: NSButton) {
         UserDefaults.standard.set(sender.state == .on, forKey: "doubleClickToCopy")
     }
+    @objc private func instantCaptureChanged(_ sender: NSButton) {
+        UserDefaults.standard.set(sender.state == .on, forKey: "instantCapture")
+    }
+
+    @objc private func simpleToolbarChanged(_ sender: NSButton) {
+        UserDefaults.standard.set(sender.state == .on, forKey: "simpleCaptureToolbar")
+    }
+
     @objc private func hideCaptureInstructionsChanged(_ sender: NSButton) {
         UserDefaults.standard.set(sender.state == .on, forKey: "hideCaptureInstructions")
     }

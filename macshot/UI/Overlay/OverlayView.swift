@@ -1798,7 +1798,7 @@ class OverlayView: NSView {
 
         // Helper text (capture instructions). Suppressed when the user has
         // enabled "Hide capture instructions" in Settings (issue #226).
-        if UserDefaults.standard.bool(forKey: "hideCaptureInstructions") {
+        if (UserDefaults.standard.object(forKey: "hideCaptureInstructions") as? Bool ?? true) {
             hidePreSelectionPresetButton()
         } else {
             if state == .idle {
@@ -3476,6 +3476,8 @@ class OverlayView: NSView {
 
     /// Whether the current tool should show the options row
     var toolHasOptionsRow: Bool {
+        // MacShotty: the short bar has no options row; … shows it.
+        if showsSimpleToolbar { return false }
         // Show options row for a selected annotation's tool even when currentTool is .select
         if selectedAnnotation != nil && toolOptionsRowView?.editingAnnotation != nil {
             return true
@@ -5168,8 +5170,38 @@ class OverlayView: NSView {
 
     // MARK: - Toolbar Layout
 
+    /// MacShotty: per-session short toolbar (⌘⇧4 / ⌘⇧3). The full toolbar is
+    /// one click away ("All tools" opens the editor) or on its own hotkey.
+    var simpleMarkupMode = false
+    static let simpleMarkupTools: [AnnotationTool] = [.arrow, .text, .rectangle, .marker, .pixelate, .number]
+    /// Tools that may be active with the short bar showing (not drawn on it).
+    private static let simpleCompatibleTools: Set<AnnotationTool> = [.select, .crop, .colorSampler, .translateOverlay]
+    static let markupToolbarExpandedKey = "markupToolbarExpanded"
+    /// Short bar applies to ⌘⇧4/⌘⇧3 overlays and to the editor window.
+    private var usesSimpleToolbar: Bool {
+        guard !isRecording else { return false }
+        return isEditorMode ? AppDelegate.simpleCaptureToolbar : simpleMarkupMode
+    }
+    /// Expanded by the … button; remembered for next time.
+    var markupToolbarExpanded: Bool {
+        get { UserDefaults.standard.bool(forKey: Self.markupToolbarExpandedKey) }
+        set { UserDefaults.standard.set(newValue, forKey: Self.markupToolbarExpandedKey) }
+    }
+    private var showsSimpleToolbar: Bool { usesSimpleToolbar && !markupToolbarExpanded }
+    private var simpleToolChosenThisSession = false
+
     /// Rebuild toolbar button content. Call when tool, color, or state changes — NOT on every draw.
     func rebuildToolbarLayout() {
+        if showsSimpleToolbar, !Self.simpleMarkupTools.contains(currentTool),
+           !Self.simpleCompatibleTools.contains(currentTool) {
+            if simpleToolChosenThisSession {
+                // A hidden tool was picked by its key: show the full bar.
+                markupToolbarExpanded = true
+            } else {
+                currentTool = .arrow
+            }
+        }
+        if showsSimpleToolbar { simpleToolChosenThisSession = true }
         // Clear tooltip before rebuilding — old button views are about to be destroyed
         hoveredTooltip = nil
         hoveredTooltipButtonView = nil
@@ -5195,6 +5227,13 @@ class OverlayView: NSView {
             hasAnnotations: movableAnnotations, translateEnabled: translateEnabled,
             isRecording: isRecording,
             isEditorMode: isEditorMode)
+        if showsSimpleToolbar {
+            bottomButtons = ToolbarLayout.simpleBottomButtons(from: bottomButtons, tools: Self.simpleMarkupTools)
+            rightButtons = ToolbarLayout.simpleRightButtons(from: rightButtons)
+        }
+        if usesSimpleToolbar {
+            bottomButtons.append(ToolbarLayout.moreToolsButton(expanded: markupToolbarExpanded))
+        }
 
         // Create strip views if needed — add to chrome parent (window content) when in scroll view
         let parent = chromeParentView ?? self
@@ -8375,32 +8414,7 @@ class OverlayView: NSView {
             overlayDelegate?.overlayViewDidRequestSave()
         case .upload:
             #if !OFFLINE
-            let confirmEnabled = UserDefaults.standard.bool(forKey: "uploadConfirmEnabled")
-            if confirmEnabled {
-                let provider = UserDefaults.standard.string(forKey: "uploadProvider") ?? "imgbb"
-                let title: String
-                switch provider {
-                case "gdrive": title = L("Upload to Google Drive?")
-                case "s3": title = L("Upload to S3?")
-                default: title = L("Upload to imgbb.com?")
-                }
-                let alert = NSAlert()
-                alert.messageText = title
-                alert.informativeText = L("Your screenshot will be uploaded.")
-                alert.addButton(withTitle: L("Upload"))
-                alert.addButton(withTitle: L("Cancel"))
-                alert.alertStyle = .informational
-                // Temporarily lower window level so the alert is visible
-                let originalLevel = window?.level ?? .statusBar
-                window?.level = .normal
-                let response = alert.runModal()
-                window?.level = originalLevel
-                if response == .alertFirstButtonReturn {
-                    overlayDelegate?.overlayViewDidRequestUpload()
-                }
-            } else {
-                overlayDelegate?.overlayViewDidRequestUpload()
-            }
+            requestUploadWithConfirmation()
             #endif
         case .share:
             // Show share picker anchored to the share button, then dismiss on selection
@@ -8480,6 +8494,8 @@ class OverlayView: NSView {
         case .recordSettings:
             let gearBtn = rightStripView?.buttonViews.first { if case .recordSettings = $0.action { return true }; return false }
             showRecordingSettingsPopover(anchorView: gearBtn)
+        case .moreTools:
+            markupToolbarExpanded.toggle()
         }
 
         // Rebuild toolbars to reflect new state (selected tool, color, etc.)
@@ -9303,6 +9319,40 @@ class OverlayView: NSView {
         return super.performKeyEquivalent(with: event)
     }
 
+    #if !OFFLINE
+    /// Upload the selection, asking first when "Confirm before uploading" is on.
+    /// Used by the toolbar Upload button and by Return when "Enter uploads" is on.
+    func requestUploadWithConfirmation() {
+        let confirmEnabled = UserDefaults.standard.bool(forKey: "uploadConfirmEnabled")
+        if confirmEnabled {
+            let provider = UserDefaults.standard.string(forKey: "uploadProvider") ?? "imgbb"
+            let title: String
+            switch provider {
+            case "gdrive": title = L("Upload to Google Drive?")
+            case "s3": title = L("Upload to S3?")
+            case "dropbox": title = L("Upload to Dropbox?")
+            default: title = L("Upload to imgbb.com?")
+            }
+            let alert = NSAlert()
+            alert.messageText = title
+            alert.informativeText = L("Your screenshot will be uploaded.")
+            alert.addButton(withTitle: L("Upload"))
+            alert.addButton(withTitle: L("Cancel"))
+            alert.alertStyle = .informational
+            // Temporarily lower window level so the alert is visible
+            let originalLevel = window?.level ?? .statusBar
+            window?.level = .normal
+            let response = alert.runModal()
+            window?.level = originalLevel
+            if response == .alertFirstButtonReturn {
+                overlayDelegate?.overlayViewDidRequestUpload()
+            }
+        } else {
+            overlayDelegate?.overlayViewDidRequestUpload()
+        }
+    }
+    #endif
+
     override func keyDown(with event: NSEvent) {
         if isRecognizingText {
             if event.keyCode == 53 {  // Escape abandons the OCR run
@@ -9448,6 +9498,13 @@ class OverlayView: NSView {
             }
         case 36, 76:  // Return / numpad Enter — quick capture (respects quickCaptureMode setting)
             if textEditView == nil, state == .selected {
+                #if !OFFLINE
+                // "Enter uploads" turns Return into capture → upload → link on the clipboard.
+                if !isEditorMode, UserDefaults.standard.bool(forKey: "quickCaptureUploads") {
+                    requestUploadWithConfirmation()
+                    break
+                }
+                #endif
                 overlayDelegate?.overlayViewDidRequestQuickSave()
             }
         case 51, 117:  // Backspace / Forward-Delete — remove selected annotation(s)
@@ -10389,6 +10446,8 @@ class OverlayView: NSView {
         autoQuickSaveMode = false
         autoScrollCaptureMode = false
         autoConfirmMode = false
+        simpleMarkupMode = false
+        simpleToolChosenThisSession = false
         isRecognizingText = false
         pendingDoubleClickCopy = nil
         lastMouseUpAt = -.infinity
