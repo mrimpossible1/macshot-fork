@@ -593,7 +593,11 @@ final class DropboxUploader: NSObject, ASWebAuthenticationPresentationContextPro
             .replacingOccurrences(of: "=", with: "")
     }
 
-    // MARK: - Token storage (file-based, same approach as Google Drive)
+    // MARK: - Token storage
+    // MacShotty: tokens live in the login Keychain. Tests (and only tests)
+    // pass a file to keep them out of the real Keychain. Builds before the
+    // Keychain move kept them in dropbox_tokens.json; that file is migrated
+    // into the Keychain on first read and then deleted.
 
     private struct TokenData: Codable {
         var accessToken: String?
@@ -601,33 +605,55 @@ final class DropboxUploader: NSObject, ASWebAuthenticationPresentationContextPro
         var expiry: Double?
     }
 
-    private var tokenFileURL: URL {
-        if let tokenFileOverride { return tokenFileOverride }
-        let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
-        let dir = appSupport.appendingPathComponent("com.sw33tlie.macshot")
-        if !FileManager.default.fileExists(atPath: dir.path) {
-            try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true,
-                                                     attributes: [.posixPermissions: 0o700])
-        }
-        return dir.appendingPathComponent("dropbox_tokens.json")
+    private static let keychainService = "com.mrimpossible1.macshotty.dropbox"
+    private static let keychainAccount = "dropbox-tokens"
+
+    private var legacyTokenFileURL: URL? {
+        guard let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
+        else { return nil }
+        return appSupport.appendingPathComponent("com.sw33tlie.macshot").appendingPathComponent("dropbox_tokens.json")
     }
 
     private func loadTokens() -> TokenData {
-        guard let data = try? Data(contentsOf: tokenFileURL),
+        if let tokenFileOverride {
+            guard let data = try? Data(contentsOf: tokenFileOverride),
+                  let tokens = try? JSONDecoder().decode(TokenData.self, from: data) else { return TokenData() }
+            return tokens
+        }
+        if let data = KeychainStore.read(service: Self.keychainService, account: Self.keychainAccount),
+           let tokens = try? JSONDecoder().decode(TokenData.self, from: data) {
+            return tokens
+        }
+        // One-time migration from the old plain file.
+        guard let legacy = legacyTokenFileURL, let data = try? Data(contentsOf: legacy),
               let tokens = try? JSONDecoder().decode(TokenData.self, from: data) else { return TokenData() }
+        if KeychainStore.write(data, service: Self.keychainService, account: Self.keychainAccount) {
+            try? FileManager.default.removeItem(at: legacy)
+        }
         return tokens
     }
 
     private func saveToken(accessToken: String, refreshToken: String, expiry: Double) {
         let tokens = TokenData(accessToken: accessToken, refreshToken: refreshToken, expiry: expiry)
         guard let data = try? JSONEncoder().encode(tokens) else { return }
-        do {
-            try data.write(to: tokenFileURL, options: .atomic)
-            try FileManager.default.setAttributes([.posixPermissions: 0o600], ofItemAtPath: tokenFileURL.path)
-        } catch { /* The next token lookup reports a failed write. */ }
+        if let tokenFileOverride {
+            try? data.write(to: tokenFileOverride, options: .atomic)
+            return
+        }
+        // A refused Keychain write leaves no token: the next upload asks to connect again.
+        KeychainStore.write(data, service: Self.keychainService, account: Self.keychainAccount)
+        if let legacy = legacyTokenFileURL { try? FileManager.default.removeItem(at: legacy) }
     }
 
-    private func deleteTokens() { try? FileManager.default.removeItem(at: tokenFileURL) }
+    private func deleteTokens() {
+        if let tokenFileOverride {
+            try? FileManager.default.removeItem(at: tokenFileOverride)
+            return
+        }
+        KeychainStore.delete(service: Self.keychainService, account: Self.keychainAccount)
+        if let legacy = legacyTokenFileURL { try? FileManager.default.removeItem(at: legacy) }
+    }
+
     private func loadAccessToken() -> String? { loadTokens().accessToken }
     private func loadRefreshToken() -> String? { loadTokens().refreshToken }
     private func loadExpiry() -> Double? { loadTokens().expiry }
