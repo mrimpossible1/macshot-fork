@@ -90,7 +90,7 @@ class UploadToastController {
         statusLabel?.stringValue = String(format: L("Uploading... %d%%"), Int(fraction * 100))
     }
 
-    func showSuccess(link: String, deleteURL: String) {
+    func showSuccess(link: String, deleteURL: String, title: String? = nil) {
         guard let window = window, let contentView = window.contentView else { return }
         self.currentLink = link
 
@@ -133,7 +133,7 @@ class UploadToastController {
         iconView?.frame = NSRect(x: 14, y: (toastHeight - 28) / 2, width: 28, height: 28)
 
         // Title
-        let titleLabel = NSTextField(labelWithString: L("URL copied to the clipboard"))
+        let titleLabel = NSTextField(labelWithString: title ?? L("URL copied to the clipboard"))
         titleLabel.frame = NSRect(x: 50, y: toastHeight - 28, width: toastWidth - 140, height: 18)
         titleLabel.font = NSFont.systemFont(ofSize: 13, weight: .semibold)
         titleLabel.textColor = .labelColor

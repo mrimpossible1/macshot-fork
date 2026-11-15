@@ -2292,20 +2292,28 @@ class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
 
         // Auto-redact sensitive text and name the file from its own text
         // before anything leaves the Mac (Settings → Uploads).
-        UploadPreparation.prepare(image, wantsTitle: provider == "dropbox") { prepared in
+        UploadPreparation.prepare(image, wantsTitle: provider == "dropbox") { [weak self] prepared in
             if prepared.couldNotCheck {
                 toast.showError(message: "Couldn't check this screenshot for sensitive text, so it wasn't uploaded. Try again, or turn off auto-redact in Settings → Uploads.")
                 return
             }
+            // MacShotty: show exactly what will be public before it leaves the Mac.
+            let decision = self?.confirmUploadPreview(prepared, provider: provider) ?? (upload: true, title: prepared.title)
+            guard decision.upload else {
+                toast.dismiss()
+                self?.returnFocusIfNeeded()
+                return
+            }
             let image = prepared.image
             if provider == "dropbox" {
-                DropboxUploader.shared.uploadImage(image, title: prepared.title, progress: { fraction in
+                let hidden = prepared.redactedCount
+                DropboxUploader.shared.uploadImage(image, title: decision.title, progress: { fraction in
                     toast.updateProgress(fraction)
-                }) { result in
+                }) { [weak self] result in
                     switch result {
                     case .success(let link):
                         UploadLinkClipboard.copy(link)
-                        toast.showSuccess(link: link, deleteURL: "")
+                        toast.showSuccess(link: link, deleteURL: "", title: self?.dropboxSuccessTitle(hidden: hidden))
                     case .failure(let error):
                         toast.showError(message: error.localizedDescription)
                     }
@@ -3729,6 +3737,103 @@ extension AppDelegate: NSMenuDelegate {
         if alert.runModal() == .alertFirstButtonReturn {
             ScreenshotHistory.shared.clear()
         }
+    }
+}
+
+// MARK: - Upload preview (MacShotty)
+
+extension AppDelegate {
+    static let uploadPreviewKey = "uploadPreview"
+    static var uploadPreviewEnabled: Bool { UserDefaults.standard.object(forKey: uploadPreviewKey) as? Bool ?? true }
+
+    /// Shows the image exactly as it will be uploaded (sensitive text already
+    /// covered), how many items were covered, who can open the link, and the
+    /// file name, which Dropbox also puts in the link. Returns the edited name.
+    fileprivate func confirmUploadPreview(_ prepared: UploadPreparation.Prepared, provider: String) -> (upload: Bool, title: String?) {
+        guard Self.uploadPreviewEnabled else { return (true, prepared.title) }
+        let alert = NSAlert()
+        alert.messageText = L("Upload this screenshot?")
+        var info = prepared.redactedCount > 0
+            ? String(format: L("%d sensitive items are covered with dark boxes."), prepared.redactedCount)
+            : L("Nothing was found to cover (emails, phone numbers, card numbers, keys). Check names and other details yourself.")
+        if provider == "dropbox" { info += "\n" + dropboxLinkSummary() }
+        alert.informativeText = info
+
+        let width: CGFloat = 440
+        let size = prepared.image.size
+        let scale = min(width / max(size.width, 1), 280 / max(size.height, 1), 1)
+        let imageSize = NSSize(width: max(1, (size.width * scale).rounded()), height: max(1, (size.height * scale).rounded()))
+        let nameHeight: CGFloat = provider == "dropbox" ? 52 : 0
+        let container = NSView(frame: NSRect(x: 0, y: 0, width: width, height: imageSize.height + nameHeight))
+        let imageView = NSImageView(frame: NSRect(x: (width - imageSize.width) / 2, y: nameHeight,
+                                                  width: imageSize.width, height: imageSize.height))
+        imageView.image = prepared.image
+        imageView.imageScaling = .scaleProportionallyUpOrDown
+        imageView.wantsLayer = true
+        imageView.layer?.borderWidth = 1
+        imageView.layer?.borderColor = NSColor.separatorColor.cgColor
+        container.addSubview(imageView)
+        var nameField: NSTextField?
+        if provider == "dropbox" {
+            let label = NSTextField(labelWithString: L("File name (also appears in the link):"))
+            label.font = NSFont.systemFont(ofSize: 11)
+            label.textColor = .secondaryLabelColor
+            label.frame = NSRect(x: 0, y: 28, width: width, height: 16)
+            container.addSubview(label)
+            let field = NSTextField(string: prepared.title ?? "")
+            field.placeholderString = L("Empty: use the date-based name")
+            field.frame = NSRect(x: 0, y: 0, width: width, height: 24)
+            container.addSubview(field)
+            nameField = field
+        }
+        alert.accessoryView = container
+        alert.addButton(withTitle: L("Upload"))
+        alert.addButton(withTitle: L("Cancel"))
+        alert.showsSuppressionButton = true
+        alert.suppressionButton?.title = L("Don't show this preview again")
+        NSApp.activate(ignoringOtherApps: true)
+        let response = alert.runModal()
+        if alert.suppressionButton?.state == .on {
+            UserDefaults.standard.set(false, forKey: Self.uploadPreviewKey)
+        }
+        guard response == .alertFirstButtonReturn else { return (false, nil) }
+        guard let field = nameField else { return (true, prepared.title) }
+        let cleaned = String(ReadableCaptureName.clean(field.stringValue).prefix(80))
+        return (true, cleaned.isEmpty ? nil : cleaned)
+    }
+
+    fileprivate func dropboxLinkSummary() -> String {
+        let uploader = DropboxUploader.shared
+        let who: String
+        switch uploader.linkAudience {
+        case .none: return L("No link is made: the file is only in your Dropbox.")
+        case .team: who = L("Your Dropbox team can open the link")
+        case .publicLink: who = L("Anyone with the link can open it")
+        }
+        guard uploader.linkExpiryDays > 0,
+              let date = Calendar.current.date(byAdding: .day, value: uploader.linkExpiryDays, to: Date()) else {
+            return who + "."
+        }
+        return String(format: L("%@ until %@."), who, Self.shortDate(date))
+    }
+
+    /// "Link copied · expires Nov 21 · 2 hidden"
+    fileprivate func dropboxSuccessTitle(hidden: Int) -> String {
+        let uploader = DropboxUploader.shared
+        var parts = [uploader.linkAudience == .none ? L("Dropbox page copied") : L("Link copied")]
+        if uploader.linkAudience != .none, uploader.linkExpiryDays > 0,
+           let date = Calendar.current.date(byAdding: .day, value: uploader.linkExpiryDays, to: Date()) {
+            parts.append(String(format: L("expires %@"), Self.shortDate(date)))
+        }
+        if hidden > 0 { parts.append(String(format: L("%d hidden"), hidden)) }
+        return parts.joined(separator: " · ")
+    }
+
+    fileprivate static func shortDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US")
+        formatter.setLocalizedDateFormatFromTemplate("MMM d")
+        return formatter.string(from: date)
     }
 }
 

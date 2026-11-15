@@ -29,6 +29,12 @@ Repo: https://github.com/mrimpossible1/macshot-fork (fork of https://github.com/
 - **CleanShot-style defaults**: ⌘⇧4 captures an area and ⌘⇧3 the full screen (turn off the macOS versions in System Settings → Keyboard → Keyboard Shortcuts → Screenshots so MacShotty gets them), the floating thumbnail appears bottom-left, and the "Click a window · Drag for custom area" instruction box is hidden (Settings → General → uncheck "Hide capture instructions" to bring it back). Both can be changed in Settings.
 - **Remove Pauses & Filler Words** (video editor → Captions panel): transcribes on this Mac, then cuts silences over 0.7 s and "um"/"uh" with a little breathing room. The cuts are marked automatic, so running it again replaces them and "Restore Removed Pauses" (or Undo) puts them back. Like Tella's silence and filler removal. Pure planner: `PauseTrimmer`.
 - **Clean up audio** (video editor → Captions panel → Audio): renders the mic track once into a lossless file beside the project: 80 Hz high-pass, a gentle gate that lowers background noise between words, leveling to about -20 dBFS, and a soft limiter. Preview and every export use it in place of the original track (`AudioCleanup`, `VideoCompositionBuilder.replacingFirstAudio`).
+- **Security & UX pass (Nov 14):**
+  - Dropbox tokens live in the login Keychain (the old `dropbox_tokens.json` is migrated, then deleted).
+  - `macshot://` links are off by default (Settings turns them on for Raycast/Alfred); instant full-screen capture made them able to copy the whole screen without any interaction.
+  - **Test Dropbox** button (Settings → Uploads → Dropbox) uploads a small file, makes a link like a real upload, deletes the file and says what failed. Sign-in failures now explain themselves. Dropbox is the default upload provider.
+  - **Upload preview** (on by default; "Don't show again" or Settings turns it off): the image exactly as it will be uploaded with covered items visible, how many were covered (or a warning that nothing was), who can open the link and until when, and the editable file name that also appears in the link.
+  - After an upload the toast reads like "Link copied · expires Nov 21 · 2 hidden".
 - **Auto Zoom new recordings** (Zoom panel, on by default): a fresh recording opens with zooms already placed from your clicks and typing, like Screen Studio. Turn it off to start with no zooms.
 
 ## Before daily use

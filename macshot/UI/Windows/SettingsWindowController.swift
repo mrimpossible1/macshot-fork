@@ -2070,6 +2070,11 @@ class SettingsWindowController: NSWindowController, NSToolbarDelegate, NSWindowD
         dropboxDirectCheckbox.state = UserDefaults.standard.bool(forKey: "dropboxDirectLinks") ? .on : .off
         stack.addArrangedSubview(indented(dropboxDirectCheckbox))
 
+        let previewCheckbox = NSButton(checkboxWithTitle: L("Preview each upload (shows the covered items and the file name)"),
+                                       target: self, action: #selector(uploadPreviewChanged(_:)))
+        previewCheckbox.state = AppDelegate.uploadPreviewEnabled ? .on : .off
+        stack.addArrangedSubview(indented(previewCheckbox))
+
         let archiveCheckbox = NSButton(checkboxWithTitle: L("Each month, move last month's files into Archive/YYYY-MM"), target: self, action: #selector(dropboxArchiveChanged(_:)))
         archiveCheckbox.state = DropboxUploader.shared.monthlyArchive ? .on : .off
         stack.addArrangedSubview(indented(archiveCheckbox))
@@ -2490,6 +2495,10 @@ class SettingsWindowController: NSWindowController, NSToolbarDelegate, NSWindowD
 
     @objc private func quickCaptureUploadsChanged(_ sender: NSButton) {
         UserDefaults.standard.set(sender.state == .on, forKey: "quickCaptureUploads")
+    }
+
+    @objc private func uploadPreviewChanged(_ sender: NSButton) {
+        UserDefaults.standard.set(sender.state == .on, forKey: AppDelegate.uploadPreviewKey)
     }
 
     @objc private func dropboxArchiveChanged(_ sender: NSButton) {
