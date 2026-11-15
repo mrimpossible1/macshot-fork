@@ -32,6 +32,7 @@ final class VideoEditorWindowController: NSWindowController, NSWindowDelegate {
     var savedRevision: UInt64?
     private var statusTimer: Timer?
     private var captionTask: Task<Void, Never>?
+    private var pauseTask: Task<Void, Never>?
 
     /// Opens a video in the editor.
     /// - Parameter deleteOnClose: Temporary input is removed after the editor
@@ -276,6 +277,7 @@ final class VideoEditorWindowController: NSWindowController, NSWindowDelegate {
 
     func windowWillClose(_ notification: Notification) {
         captionTask?.cancel()
+        pauseTask?.cancel()
         // Commit an in-progress inline text edit before the final save.
         stage?.tearDown()
         editorDocument?.saveNow(synchronously: true)
@@ -675,6 +677,46 @@ final class VideoEditorWindowController: NSWindowController, NSWindowDelegate {
                 self.showStatus(error.localizedDescription, isError: true)
             }
         }
+    }
+
+    // MARK: Pauses (MacShotty)
+
+    /// Transcribes on this Mac, then cuts pauses and "um"/"uh". Replaces any
+    /// earlier automatic cuts; one Undo restores everything.
+    func removePauses() {
+        pauseTask?.cancel()
+        showStatus(L("Finding pauses…"), persist: true)
+        pauseTask = Task { [weak self] in
+            guard let self else { return }
+            do {
+                let words = try await VideoCaptionTranscriber.transcribe(asset: self.editorDocument.asset,
+                                                                        lease: self.editorDocument.source.lease)
+                guard !Task.isCancelled else { return }
+                let p = self.editorDocument.project
+                guard words.contains(where: { !PauseTrimmer.isFiller($0.text) }) else {
+                    self.showStatus(L("No speech was recognized"), isError: true)
+                    return
+                }
+                let ranges = PauseTrimmer.cutRanges(words: words, trimStart: p.trimStart, trimEnd: p.trimEnd)
+                self.editorDocument.edit([.segments, .render, .timing]) { project in
+                    project.cuts.removeAll { $0.isAutomatic }
+                    project.cuts.append(contentsOf: ranges.map {
+                        VideoCutSegment(startTime: $0.0, endTime: $0.1, isAutomatic: true)
+                    })
+                }
+                let seconds = Int(PauseTrimmer.totalDuration(ranges).rounded())
+                self.showStatus(ranges.isEmpty ? L("No pauses to remove")
+                                               : String(format: L("Removed %d pauses (%d s shorter)"), ranges.count, seconds))
+            } catch {
+                guard !(error is CancellationError) else { return }
+                self.showStatus(error.localizedDescription, isError: true)
+            }
+        }
+    }
+
+    func restorePauses() {
+        editorDocument.edit([.segments, .render, .timing]) { $0.cuts.removeAll { $0.isAutomatic } }
+        showStatus(L("Pauses restored"))
     }
 
     func exportSubtitles() {

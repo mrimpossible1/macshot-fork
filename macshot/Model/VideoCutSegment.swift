@@ -14,20 +14,24 @@ final class VideoCutSegment: Codable {
     var id: UUID
     var startTime: Double
     var endTime: Double
+    /// Placed by "Remove Pauses" (MacShotty); a second run replaces these.
+    var isAutomatic: Bool
 
-    init(id: UUID = UUID(), startTime: Double, endTime: Double) {
+    init(id: UUID = UUID(), startTime: Double, endTime: Double, isAutomatic: Bool = false) {
         self.id = id
         self.startTime = startTime
         self.endTime = endTime
+        self.isAutomatic = isAutomatic
     }
 
-    private enum CodingKeys: String, CodingKey { case id, startTime, endTime }
+    private enum CodingKeys: String, CodingKey { case id, startTime, endTime, isAutomatic }
 
     init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
         id = c.decode(.id, or: UUID())
         startTime = c.decode(.startTime, or: 0)
         endTime = c.decode(.endTime, or: 0)
+        isAutomatic = c.decode(.isAutomatic, or: false)
     }
 
     var duration: Double { max(0, endTime - startTime) }

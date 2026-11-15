@@ -922,3 +922,12 @@
 "Fewer tools" = "Fewer tools";
 "More tools and options" = "More tools and options";
 "Simple markup toolbar: six tools, Copy, Link, Save (the … button shows everything)" = "Simple markup toolbar: six tools, Copy, Link, Save (the … button shows everything)";
+"Finding pauses…" = "Finding pauses…";
+"No pauses to remove" = "No pauses to remove";
+"Removed %d pauses (%d s shorter)" = "Removed %d pauses (%d s shorter)";
+"Pauses restored" = "Pauses restored";
+"Pauses" = "Pauses";
+"Remove Pauses Again" = "Remove Pauses Again";
+"Remove Pauses & Filler Words" = "Remove Pauses & Filler Words";
+"Restore Removed Pauses" = "Restore Removed Pauses";
+"Cuts silences longer than 0.7 s and “um” / “uh”, keeping a little breathing room. Undo puts them back. Silent screen demos lose their silent parts too." = "Cuts silences longer than 0.7 s and \"um\" / \"uh\", keeping a little breathing room. Undo puts them back. Silent screen demos lose their silent parts too.";

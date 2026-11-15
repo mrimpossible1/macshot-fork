@@ -691,6 +691,19 @@ final class VideoInspectorView: NSView {
                               symbol: "waveform", primary: document.project.captions.isEmpty, action: #selector(generateCaptions))
         add(generate)
         add(note(L("Captions are transcribed on this Mac. Nothing is uploaded."), symbol: "lock.shield"))
+
+        // MacShotty: cut dead air and "um"/"uh" in one click.
+        add(InspectorSectionHeader(L("Pauses")))
+        let hasAutoCuts = document.project.cuts.contains { $0.isAutomatic }
+        add(button(hasAutoCuts ? L("Remove Pauses Again") : L("Remove Pauses & Filler Words"),
+                   symbol: "scissors", action: #selector(removePauses)))
+        add(note(L("Cuts silences longer than 0.7 s and “um” / “uh”, keeping a little breathing room. Undo puts them back. Silent screen demos lose their silent parts too."),
+                 symbol: "waveform.badge.minus"))
+        if hasAutoCuts {
+            add(button(L("Restore Removed Pauses"), symbol: "arrow.uturn.backward", action: #selector(restorePauses)))
+        }
+        add(InspectorSectionHeader(L("Captions")))
+
         guard !document.project.captions.isEmpty else { return }
         add(toggle(L("Show captions"), get: { [unowned self] in self.look.captions.show }) { p, on in p.look.captions.show = on })
         add(InspectorCard([
@@ -706,6 +719,11 @@ final class VideoInspectorView: NSView {
     }
 
     @objc private func generateCaptions() { controller?.generateCaptions() }
+    @objc private func removePauses() { controller?.removePauses() }
+    @objc private func restorePauses() {
+        controller?.restorePauses()
+        rebuild()
+    }
     @objc private func exportSRT() { controller?.exportSubtitles() }
     @objc private func removeCaptions() {
         document.edit([.render, .segments]) { $0.captions.removeAll() }
