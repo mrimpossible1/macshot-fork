@@ -1,7 +1,7 @@
 import Cocoa
 import XCTest
 
-/// macshot ships 40 translations. Nothing in the build checks them, so a new
+/// This fork ships English only (upstream macshot ships 40 translations). Nothing in the build checks them, so a new
 /// `L("…")` key or an edited translation can silently leave users with an
 /// English string — or, for a format string, crash `String(format:)`.
 ///
@@ -73,7 +73,7 @@ final class LocalizationTests: XCTestCase {
     // MARK: - Sanity of the fixture itself
 
     func testTheTestCanSeeTheTranslations() throws {
-        XCTAssertGreaterThan(Self.tables.count, 30, "expected the shipped locales at \(Self.sourceRoot.path)")
+        XCTAssertGreaterThanOrEqual(Self.tables.count, 1, "expected the shipped locales at \(Self.sourceRoot.path)")
         XCTAssertNotNil(Self.tables[Self.baseLocale], "the English base table is missing")
         XCTAssertGreaterThan(Self.keysUsedInCode.count, 100, "the L(\"…\") scan found almost nothing — check the regex")
     }

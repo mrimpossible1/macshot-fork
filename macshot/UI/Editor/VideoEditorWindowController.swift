@@ -32,6 +32,8 @@ final class VideoEditorWindowController: NSWindowController, NSWindowDelegate {
     var savedRevision: UInt64?
     private var statusTimer: Timer?
     private var captionTask: Task<Void, Never>?
+    private var pauseTask: Task<Void, Never>?
+    private var cleanAudioTask: Task<Void, Never>?
 
     /// Opens a video in the editor.
     /// - Parameter deleteOnClose: Temporary input is removed after the editor
@@ -218,6 +220,15 @@ final class VideoEditorWindowController: NSWindowController, NSWindowDelegate {
         refreshChrome()
         timeChanged(0)
         DispatchQueue.main.async { [weak self] in self?.layoutTimeline() }
+        // Like Screen Studio: a fresh recording opens with zooms already placed.
+        if editorDocument.isNewProject, editorDocument.hasPointerData, editorDocument.project.zooms.isEmpty,
+           Self.autoZoomNewRecordings {
+            DispatchQueue.main.async { [weak self] in self?.autoZoom(quiet: true) }
+        }
+        // Clean audio was on but its file is gone (e.g. caches cleared): redo it.
+        if editorDocument.project.cleanAudio, !playback.planner.usesCleanAudio(editorDocument.project) {
+            DispatchQueue.main.async { [weak self] in self?.setCleanAudio(true) }
+        }
     }
 
     private func layoutTimeline() {
@@ -271,6 +282,8 @@ final class VideoEditorWindowController: NSWindowController, NSWindowDelegate {
 
     func windowWillClose(_ notification: Notification) {
         captionTask?.cancel()
+        pauseTask?.cancel()
+        cleanAudioTask?.cancel()
         // Commit an in-progress inline text edit before the final save.
         stage?.tearDown()
         editorDocument?.saveNow(synchronously: true)
@@ -327,6 +340,11 @@ final class VideoEditorWindowController: NSWindowController, NSWindowDelegate {
         guard let raw = sender.selectedItem?.representedObject as? String, let aspect = VideoAspectRatio(rawValue: raw) else { return }
         editorDocument.edit([.render]) { $0.look.frame.aspect = aspect }
         editorDocument.rememberLook()
+        stage.needsLayout = true
+    }
+
+    /// A saved look preset replaced the whole look, aspect ratio included.
+    func lookPresetApplied() {
         stage.needsLayout = true
     }
 
@@ -470,7 +488,12 @@ final class VideoEditorWindowController: NSWindowController, NSWindowDelegate {
         playback.seek(toSource: start + 0.3)
     }
 
-    func autoZoom() {
+    static let autoZoomNewRecordingsKey = "videoAutoZoomNewRecordings"
+    static var autoZoomNewRecordings: Bool {
+        UserDefaults.standard.object(forKey: autoZoomNewRecordingsKey) as? Bool ?? true
+    }
+
+    func autoZoom(quiet: Bool = false) {
         guard let recording = editorDocument.recording else { return }
         let p = editorDocument.project
         let manual = p.zooms.filter { !$0.isAutomatic }.map { $0.startTime...$0.endTime }
@@ -478,7 +501,7 @@ final class VideoEditorWindowController: NSWindowController, NSWindowDelegate {
         let suggestions = AutoZoomPlanner.suggestions(recording: recording, track: track, range: p.trimStart...p.trimEnd,
                                                       level: CGFloat(p.look.zoom.defaultLevel), avoiding: manual)
         guard !suggestions.isEmpty else {
-            showStatus(L("No clicks or typing found to zoom into"), isError: true)
+            if !quiet { showStatus(L("No clicks or typing found to zoom into"), isError: true) }
             return
         }
         let transition = p.look.zoom.transition.duration
@@ -654,12 +677,101 @@ final class VideoEditorWindowController: NSWindowController, NSWindowDelegate {
                     return
                 }
                 self.editorDocument.edit([.render, .segments]) { $0.captions = captions; $0.look.captions.show = true }
+                self.inspector.rebuild()
                 self.showStatus(String(format: L("Added %d captions"), captions.count))
             } catch {
                 guard !(error is CancellationError) else { return }
                 self.showStatus(error.localizedDescription, isError: true)
             }
         }
+    }
+
+    // MARK: Pauses (MacShotty)
+
+    /// Transcribes on this Mac, then cuts pauses and "um"/"uh". Replaces any
+    /// earlier automatic cuts; one Undo restores everything.
+    func removePauses() {
+        pauseTask?.cancel()
+        showStatus(L("Finding pauses…"), persist: true)
+        pauseTask = Task { [weak self] in
+            guard let self else { return }
+            do {
+                let words = try await VideoCaptionTranscriber.transcribe(asset: self.editorDocument.asset,
+                                                                        lease: self.editorDocument.source.lease)
+                guard !Task.isCancelled else { return }
+                let p = self.editorDocument.project
+                guard words.contains(where: { !PauseTrimmer.isFiller($0.text) }) else {
+                    self.showStatus(L("No speech was recognized"), isError: true)
+                    return
+                }
+                let ranges = PauseTrimmer.cutRanges(words: words, trimStart: p.trimStart, trimEnd: p.trimEnd)
+                self.editorDocument.edit([.segments, .render, .timing]) { project in
+                    project.cuts.removeAll { $0.isAutomatic }
+                    project.cuts.append(contentsOf: ranges.map {
+                        VideoCutSegment(startTime: $0.0, endTime: $0.1, isAutomatic: true)
+                    })
+                }
+                self.inspector.rebuild()
+                let seconds = Int(PauseTrimmer.totalDuration(ranges).rounded())
+                self.showStatus(ranges.isEmpty ? L("No pauses to remove")
+                                               : String(format: L("Removed %d pauses (%d s shorter)"), ranges.count, seconds))
+            } catch {
+                guard !(error is CancellationError) else { return }
+                self.showStatus(error.localizedDescription, isError: true)
+            }
+        }
+    }
+
+    // MARK: Audio clean-up (MacShotty)
+
+    /// Turns the cleaned-up mic track on or off. The first time, it is
+    /// rendered on this Mac and saved beside the project.
+    func setCleanAudio(_ on: Bool) {
+        guard on else {
+            cleanAudioTask?.cancel()
+            editorDocument.edit([.render, .timing]) { $0.cleanAudio = false }
+            return
+        }
+        if playback.planner.cleanAudioTrack != nil {
+            editorDocument.edit([.render, .timing]) { $0.cleanAudio = true }
+            showStatus(L("Audio cleaned up"))
+            return
+        }
+        guard editorDocument.audioTrackCount > 0,
+              let url = AudioCleanup.outputURL(projectDirectory: editorDocument.projectDirectory,
+                                               sourcePath: editorDocument.source.originalURL.path) else {
+            showStatus(L("This recording has no audio to clean up."), isError: true)
+            return
+        }
+        cleanAudioTask?.cancel()
+        showStatus(L("Cleaning up audio…"), persist: true)
+        let asset = editorDocument.asset
+        let lease = editorDocument.source.lease
+        cleanAudioTask = Task { [weak self] in
+            do {
+                try await AudioCleanup.render(asset: asset, to: url)
+                withExtendedLifetime(lease) {}
+                guard let self, !Task.isCancelled else { return }
+                self.editorDocument.edit([.render, .timing]) { $0.cleanAudio = true }
+                self.showStatus(L("Audio cleaned up"))
+            } catch {
+                guard !(error is CancellationError) else { return }
+                self?.editorDocument.edit([.render, .timing]) { $0.cleanAudio = false }
+                let message: String
+                switch error as? AudioCleanup.CleanupError {
+                case .noAudio?: message = L("This recording has no audio to clean up.")
+                case .readFailed?: message = L("Couldn't read the recording's audio.")
+                case .writeFailed?: message = L("Couldn't save the cleaned-up audio.")
+                case nil: message = error.localizedDescription
+                }
+                self?.showStatus(message, isError: true)
+            }
+        }
+    }
+
+    func restorePauses() {
+        editorDocument.edit([.segments, .render, .timing]) { $0.cuts.removeAll { $0.isAutomatic } }
+        showStatus(L("Pauses restored"))
     }
 
     func exportSubtitles() {

@@ -92,6 +92,7 @@ final class VideoEditorPlayback {
         let speeds = p.speeds.map { "s\($0.startTime.bitPattern)-\($0.endTime.bitPattern)@\($0.speedFactor.bitPattern)" }
         let freezes = p.freezes.map { "f\($0.atTime.bitPattern)@\($0.holdDuration.bitPattern)" }
         return (cuts + speeds + freezes).joined(separator: "|") + (planner.hasCamera ? "|cam" : "")
+            + (planner.usesCleanAudio(p) ? "|clean" : "")
     }
 
     /// Rebuilds the preview. Keeps the current item unless the timeline's
@@ -100,7 +101,7 @@ final class VideoEditorPlayback {
         let project = document.project
         let key = topologyKey()
         let needsComposition = !project.cuts.isEmpty || !project.speeds.isEmpty || !project.freezes.isEmpty
-            || planner.hasCamera
+            || planner.hasCamera || planner.usesCleanAudio(project)
         let resumeTime = requestedSourceTime ?? currentSourceTime
         do {
             if needsComposition {

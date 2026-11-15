@@ -1039,8 +1039,8 @@ private class ThumbnailView: NSView {
         if copyBtnRect.contains(p)   { onCopy?();   return }
         if saveBtnRect.contains(p)   { onSave?();   return }
 
-        // Click anywhere else on thumbnail — dismiss
-        if isHovering { onClose?() }
+        // MacShotty: clicking the image opens it for markup, like CleanShot.
+        if isHovering { onEdit?() }
     }
 
     override func scrollWheel(with event: NSEvent) {

@@ -168,45 +168,6 @@
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
-				ar,
-				bg,
-				bn,
-				ca,
-				cs,
-				da,
-				de,
-				el,
-				es,
-				fa,
-				fi,
-				fil,
-				fr,
-				he,
-				hi,
-				hr,
-				hu,
-				id,
-				it,
-				ja,
-				ko,
-				ms,
-				nb,
-				nl,
-				pl,
-				pt,
-				"pt-BR",
-				ro,
-				ru,
-				sk,
-				sr,
-				sv,
-				ta,
-				th,
-				tr,
-				uk,
-				vi,
-				"zh-Hans",
-				"zh-Hant",
 				Base,
 			);
 			mainGroup = 2F4EB1192F61B60100B71643;
@@ -405,8 +366,9 @@
 					"-weak_framework",
 					ScreenCaptureKit,
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.sw33tlie.macshot.macshot;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = com.mrimpossible1.macshotty;
+				PRODUCT_MODULE_NAME = macshot;
+				PRODUCT_NAME = MacShotty;
 				REGISTER_APP_GROUPS = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -443,8 +405,9 @@
 					"-weak_framework",
 					ScreenCaptureKit,
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.sw33tlie.macshot.macshot;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = com.mrimpossible1.macshotty;
+				PRODUCT_MODULE_NAME = macshot;
+				PRODUCT_NAME = MacShotty;
 				REGISTER_APP_GROUPS = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -478,7 +441,7 @@
 					"-weak_framework",
 					ScreenCaptureKit,
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.sw33tlie.macshot.macshotTests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.mrimpossible1.macshottyTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -512,7 +475,7 @@
 					"-weak_framework",
 					ScreenCaptureKit,
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.sw33tlie.macshot.macshotTests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.mrimpossible1.macshottyTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;

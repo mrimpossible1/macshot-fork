@@ -32,6 +32,26 @@ final class VideoRenderPlanner {
 
     var hasCamera: Bool { cameraAsset != nil }
 
+    private var cleanAudioAsset: AVAsset?
+    private var cleanAudioPath: String?
+
+    /// The cleaned-up mic track, once AudioCleanup has rendered it.
+    var cleanAudioTrack: AVAssetTrack? {
+        guard let url = AudioCleanup.outputURL(projectDirectory: document.projectDirectory,
+                                               sourcePath: document.source.originalURL.path),
+              FileManager.default.fileExists(atPath: url.path) else { return nil }
+        if cleanAudioPath != url.path {
+            cleanAudioAsset = AVURLAsset(url: url)
+            cleanAudioPath = url.path
+        }
+        return cleanAudioAsset?.tracks(withMediaType: .audio).first
+    }
+
+    /// True when the project asks for clean audio and the file is ready.
+    func usesCleanAudio(_ project: VideoProject) -> Bool {
+        project.cleanAudio && cleanAudioTrack != nil
+    }
+
     /// Scene layout of `project` at an output scale.
     func layout(for project: VideoProject, scale: CGFloat = 1, showUncropped: Bool = false) -> VideoSceneLayout? {
         var frame = project.look.frame
@@ -53,7 +73,8 @@ final class VideoRenderPlanner {
                    includeAudio: Bool) throws -> VideoCompositionBuilder.Result {
         try VideoCompositionBuilder.build(asset: document.asset, pieces: Self.pieces(project: project, from: start, to: end),
                                           includeAudio: includeAudio, sourceFrameDuration: document.frameDuration,
-                                          camera: cameraAsset)
+                                          camera: cameraAsset,
+                                          replacingFirstAudio: includeAudio && project.cleanAudio ? cleanAudioTrack : nil)
     }
 
     /// Complete video composition for a processed timeline.
