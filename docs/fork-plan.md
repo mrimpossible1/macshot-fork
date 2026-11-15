@@ -54,7 +54,12 @@ Not planned yet. Pick from here when something is actually missed in daily use.
 - Combine any number of captures on one canvas (beyond before/after).
 - Pick the before/after pair from the history panel instead of the last two captures.
 
-**Video (vs. Screen Studio)**
+**Video (vs. Screen Studio and Tella)**
+- Text behind the person: a big title layered between the background and the speaker (on-device person segmentation per webcam frame, kept in sync through cuts and speed changes). Best when the camera fills the frame.
+- Edit by transcript: delete words in the transcript to cut that part of the video.
+- Teleprompter while recording.
+- Auto title, description and chapters from the transcript (on-device model), also used for Dropbox file names.
+- Background music that ducks under the voice.
 - Audio enhance: one-click volume normalize and noise reduction for the mic track.
 - Vertical/social export preset: one click to 9:16 with a matching look preset.
 - Test first: record a 1–2 minute demo with "Editable pointer" on, apply auto-zoom, export, compare with Screen Studio, and only build the gaps actually felt.
