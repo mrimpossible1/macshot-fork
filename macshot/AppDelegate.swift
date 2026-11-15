@@ -2505,7 +2505,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
         let videoExtensions: Set<String> = ["mp4", "mov", "m4v"]
         for url in urls {
             if url.scheme == "macshot" {
-                let urlSchemeEnabled = UserDefaults.standard.object(forKey: "urlSchemeEnabled") as? Bool ?? true
+                // MacShotty: off until turned on in Settings, so other apps and
+                // web pages can't trigger captures (capture-fullscreen copies
+                // the whole screen instantly).
+                let urlSchemeEnabled = UserDefaults.standard.object(forKey: "urlSchemeEnabled") as? Bool ?? false
                 guard urlSchemeEnabled else { continue }
                 if Self.screenCaptureURLActions.contains(url.host ?? "") {
                     if !isReadyForScreenCaptureURLs,
