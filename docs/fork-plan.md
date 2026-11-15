@@ -27,6 +27,8 @@ Repo: https://github.com/mrimpossible1/macshot-fork (fork of https://github.com/
 - **Short markup bar in the editor** (Settings → General → "Simple markup toolbar", on by default): the editor that opens from the thumbnail shows six tools, color, undo/redo and Copy / Save / Upload. The … button expands to every tool plus the options row (pixelate/blur/erase, text formatting, sizes) and remembers the choice; picking a hidden tool by its key expands it too.
 - **Simple toolbar** (used when instant capture is off): ⌘⇧4 and ⌘⇧3 open a short toolbar with six tools (arrow, text, box, highlight, redact, numbers), color and undo, plus Cancel, Copy, Link (upload) and Save. "All tools" (… button) opens the capture in the editor with everything. ⌘⇧X (new "Capture Area (All Tools)" shortcut) opens the full macshot toolbar for recording, OCR, scroll capture and the rest. Mockup: the "MacShotty capture & markup" design canvas.
 - **CleanShot-style defaults**: ⌘⇧4 captures an area and ⌘⇧3 the full screen (turn off the macOS versions in System Settings → Keyboard → Keyboard Shortcuts → Screenshots so MacShotty gets them), the floating thumbnail appears bottom-left, and the "Click a window · Drag for custom area" instruction box is hidden (Settings → General → uncheck "Hide capture instructions" to bring it back). Both can be changed in Settings.
+- **Remove Pauses & Filler Words** (video editor → Captions panel): transcribes on this Mac, then cuts silences over 0.7 s and "um"/"uh" with a little breathing room. The cuts are marked automatic, so running it again replaces them and "Restore Removed Pauses" (or Undo) puts them back. Like Tella's silence and filler removal. Pure planner: `PauseTrimmer`.
+- **Clean up audio** (video editor → Captions panel → Audio): renders the mic track once into a lossless file beside the project: 80 Hz high-pass, a gentle gate that lowers background noise between words, leveling to about -20 dBFS, and a soft limiter. Preview and every export use it in place of the original track (`AudioCleanup`, `VideoCompositionBuilder.replacingFirstAudio`).
 - **Auto Zoom new recordings** (Zoom panel, on by default): a fresh recording opens with zooms already placed from your clicks and typing, like Screen Studio. Turn it off to start with no zooms.
 
 ## Before daily use
@@ -60,7 +62,6 @@ Not planned yet. Pick from here when something is actually missed in daily use.
 - Teleprompter while recording.
 - Auto title, description and chapters from the transcript (on-device model), also used for Dropbox file names.
 - Background music that ducks under the voice.
-- Audio enhance: one-click volume normalize and noise reduction for the mic track.
 - Vertical/social export preset: one click to 9:16 with a matching look preset.
 - Test first: record a 1–2 minute demo with "Editable pointer" on, apply auto-zoom, export, compare with Screen Studio, and only build the gaps actually felt.
 

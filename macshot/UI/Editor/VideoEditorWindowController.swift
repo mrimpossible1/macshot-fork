@@ -33,6 +33,7 @@ final class VideoEditorWindowController: NSWindowController, NSWindowDelegate {
     private var statusTimer: Timer?
     private var captionTask: Task<Void, Never>?
     private var pauseTask: Task<Void, Never>?
+    private var cleanAudioTask: Task<Void, Never>?
 
     /// Opens a video in the editor.
     /// - Parameter deleteOnClose: Temporary input is removed after the editor
@@ -224,6 +225,10 @@ final class VideoEditorWindowController: NSWindowController, NSWindowDelegate {
            Self.autoZoomNewRecordings {
             DispatchQueue.main.async { [weak self] in self?.autoZoom(quiet: true) }
         }
+        // Clean audio was on but its file is gone (e.g. caches cleared): redo it.
+        if editorDocument.project.cleanAudio, !playback.planner.usesCleanAudio(editorDocument.project) {
+            DispatchQueue.main.async { [weak self] in self?.setCleanAudio(true) }
+        }
     }
 
     private func layoutTimeline() {
@@ -278,6 +283,7 @@ final class VideoEditorWindowController: NSWindowController, NSWindowDelegate {
     func windowWillClose(_ notification: Notification) {
         captionTask?.cancel()
         pauseTask?.cancel()
+        cleanAudioTask?.cancel()
         // Commit an in-progress inline text edit before the final save.
         stage?.tearDown()
         editorDocument?.saveNow(synchronously: true)
@@ -710,6 +716,46 @@ final class VideoEditorWindowController: NSWindowController, NSWindowDelegate {
             } catch {
                 guard !(error is CancellationError) else { return }
                 self.showStatus(error.localizedDescription, isError: true)
+            }
+        }
+    }
+
+    // MARK: Audio clean-up (MacShotty)
+
+    /// Turns the cleaned-up mic track on or off. The first time, it is
+    /// rendered on this Mac and saved beside the project.
+    func setCleanAudio(_ on: Bool) {
+        guard on else {
+            cleanAudioTask?.cancel()
+            editorDocument.edit([.render, .timing]) { $0.cleanAudio = false }
+            return
+        }
+        if playback.planner.cleanAudioTrack != nil {
+            editorDocument.edit([.render, .timing]) { $0.cleanAudio = true }
+            showStatus(L("Audio cleaned up"))
+            return
+        }
+        guard editorDocument.audioTrackCount > 0,
+              let url = AudioCleanup.outputURL(projectDirectory: editorDocument.projectDirectory,
+                                               sourcePath: editorDocument.source.originalURL.path) else {
+            showStatus(L("This recording has no audio to clean up."), isError: true)
+            return
+        }
+        cleanAudioTask?.cancel()
+        showStatus(L("Cleaning up audio…"), persist: true)
+        let asset = editorDocument.asset
+        let lease = editorDocument.source.lease
+        cleanAudioTask = Task { [weak self] in
+            do {
+                try await AudioCleanup.render(asset: asset, to: url)
+                withExtendedLifetime(lease) {}
+                guard let self, !Task.isCancelled else { return }
+                self.editorDocument.edit([.render, .timing]) { $0.cleanAudio = true }
+                self.showStatus(L("Audio cleaned up"))
+            } catch {
+                guard !(error is CancellationError) else { return }
+                self?.editorDocument.edit([.render, .timing]) { $0.cleanAudio = false }
+                self?.showStatus(error.localizedDescription, isError: true)
             }
         }
     }

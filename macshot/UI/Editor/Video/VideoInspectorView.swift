@@ -687,10 +687,17 @@ final class VideoInspectorView: NSView {
             add(note(L("This recording has no audio to transcribe.")))
             return
         }
-        let generate = button(document.project.captions.isEmpty ? L("Generate Captions") : L("Regenerate Captions"),
-                              symbol: "waveform", primary: document.project.captions.isEmpty, action: #selector(generateCaptions))
-        add(generate)
-        add(note(L("Captions are transcribed on this Mac. Nothing is uploaded."), symbol: "lock.shield"))
+        // MacShotty: one-click mic clean-up.
+        add(InspectorSectionHeader(L("Audio")))
+        let cleanRow = InspectorSwitchRow(title: L("Clean up audio"),
+                                          subtitle: L("Evens out your voice and lowers background noise, on this Mac"),
+                                          isOn: document.project.cleanAudio) { [weak self] on in
+            self?.controller?.setCleanAudio(on)
+        }
+        refreshers.append { [weak cleanRow, weak self] in
+            cleanRow?.toggle.state = (self?.document.project.cleanAudio ?? false) ? .on : .off
+        }
+        add(InspectorCard([cleanRow]))
 
         // MacShotty: cut dead air and "um"/"uh" in one click.
         add(InspectorSectionHeader(L("Pauses")))
@@ -703,6 +710,10 @@ final class VideoInspectorView: NSView {
             add(button(L("Restore Removed Pauses"), symbol: "arrow.uturn.backward", action: #selector(restorePauses)))
         }
         add(InspectorSectionHeader(L("Captions")))
+        let generate = button(document.project.captions.isEmpty ? L("Generate Captions") : L("Regenerate Captions"),
+                              symbol: "waveform", primary: document.project.captions.isEmpty, action: #selector(generateCaptions))
+        add(generate)
+        add(note(L("Transcription happens on this Mac. Nothing is uploaded."), symbol: "lock.shield"))
 
         guard !document.project.captions.isEmpty else { return }
         add(toggle(L("Show captions"), get: { [unowned self] in self.look.captions.show }) { p, on in p.look.captions.show = on })

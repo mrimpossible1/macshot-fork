@@ -395,6 +395,8 @@ final class VideoProject: Codable {
     var trimStart: Double
     var trimEnd: Double
     var muted = false
+    /// MacShotty: use the cleaned-up mic track (AudioCleanup) for preview and export.
+    var cleanAudio = false
     var crop = CGRect(x: 0, y: 0, width: 1, height: 1)
     var look: VideoLook
 
@@ -414,7 +416,7 @@ final class VideoProject: Codable {
     }
 
     private enum CodingKeys: String, CodingKey {
-        case version, sourceDuration, trimStart, trimEnd, muted, crop, look
+        case version, sourceDuration, trimStart, trimEnd, muted, cleanAudio, crop, look
         case zooms, censors, texts, cuts, speeds, freezes, captions
     }
 
@@ -428,6 +430,7 @@ final class VideoProject: Codable {
         trimEnd = end.isFinite ? min(max(trimStart, end), sourceDuration) : sourceDuration
         if trimEnd - trimStart < 0.1 { trimStart = 0; trimEnd = sourceDuration }
         muted = c.decode(.muted, or: false)
+        cleanAudio = c.decode(.cleanAudio, or: false)
         crop = VideoProjectLimits.normalizedRect(c.decode(.crop, or: CGRect(x: 0, y: 0, width: 1, height: 1)))
         look = c.decode(.look, or: VideoLook())
         zooms = Self.lenientArray(c, .zooms)
@@ -447,6 +450,7 @@ final class VideoProject: Codable {
         try c.encode(trimStart, forKey: .trimStart)
         try c.encode(trimEnd, forKey: .trimEnd)
         try c.encode(muted, forKey: .muted)
+        try c.encode(cleanAudio, forKey: .cleanAudio)
         try c.encode(crop, forKey: .crop)
         try c.encode(look, forKey: .look)
         try c.encode(zooms, forKey: .zooms)

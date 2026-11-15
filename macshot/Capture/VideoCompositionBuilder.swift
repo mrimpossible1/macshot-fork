@@ -26,13 +26,17 @@ enum VideoCompositionBuilder {
     /// Constructs a privately owned composition. Every insert either succeeds
     /// or throws; a partial timeline must never be presented as a valid export.
     static func build(asset: AVAsset, pieces: [VideoSpeeds.Piece], includeAudio: Bool,
-                      sourceFrameDuration: CMTime? = nil, camera: AVAsset? = nil) throws -> Result {
+                      sourceFrameDuration: CMTime? = nil, camera: AVAsset? = nil,
+                      replacingFirstAudio replacement: AVAssetTrack? = nil) throws -> Result {
         guard let sourceVideo = asset.tracks(withMediaType: .video).first else { throw BuildError.missingVideo }
         guard !pieces.isEmpty else { throw BuildError.invalidTimeline }
         let composition = AVMutableComposition()
         guard let video = composition.addMutableTrack(withMediaType: .video,
             preferredTrackID: kCMPersistentTrackID_Invalid) else { throw BuildError.missingVideo }
-        let sourceAudio = includeAudio ? asset.tracks(withMediaType: .audio) : []
+        var sourceAudio = includeAudio ? asset.tracks(withMediaType: .audio) : []
+        // MacShotty audio clean-up: the processed mic file shares the source
+        // clock, so it takes the first track's place in every piece.
+        if let replacement, !sourceAudio.isEmpty { sourceAudio[0] = replacement }
         let frameDuration = sourceFrameDuration ?? VideoFrameCadence.declaredDuration(in: asset.metadata)
             ?? VideoFrameCadence.Inspection(track: sourceVideo).duration()
         let timeScale = editingTimeScale(tracks: [sourceVideo] + sourceAudio, frameDuration: frameDuration)

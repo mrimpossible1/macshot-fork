@@ -931,3 +931,10 @@
 "Remove Pauses & Filler Words" = "Remove Pauses & Filler Words";
 "Restore Removed Pauses" = "Restore Removed Pauses";
 "Cuts silences longer than 0.7 s and “um” / “uh”, keeping a little breathing room. Undo puts them back. Silent screen demos lose their silent parts too." = "Cuts silences longer than 0.7 s and \"um\" / \"uh\", keeping a little breathing room. Undo puts them back. Silent screen demos lose their silent parts too.";
+"Audio" = "Audio";
+"Clean up audio" = "Clean up audio";
+"Evens out your voice and lowers background noise, on this Mac" = "Evens out your voice and lowers background noise, on this Mac";
+"Cleaning up audio…" = "Cleaning up audio…";
+"Audio cleaned up" = "Audio cleaned up";
+"This recording has no audio to clean up." = "This recording has no audio to clean up.";
+"Transcription happens on this Mac. Nothing is uploaded." = "Transcription happens on this Mac. Nothing is uploaded.";
