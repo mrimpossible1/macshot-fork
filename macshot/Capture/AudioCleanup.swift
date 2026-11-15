@@ -86,11 +86,11 @@ nonisolated enum AudioCleanup {
         return (samples.reduce(0) { $0 + $1 * $1 } / Float(samples.count)).squareRoot()
     }
 
-    /// Soft knee above -1 dBFS; output stays below 1.
+    /// Soft knee above -1 dBFS; output never exceeds 0.995.
     static func limit(_ x: Float) -> Float {
         let a = abs(x), t = limiterThreshold
         guard a > t else { return x }
-        let y = t + (1 - t) * tanh((a - t) / (1 - t))
+        let y = t + (0.995 - t) * tanh((a - t) / (1 - t))
         return x < 0 ? -y : y
     }
 
@@ -121,13 +121,17 @@ nonisolated enum AudioCleanup {
     /// Where a document's cleaned audio lives: beside its project when it has
     /// one, else in Caches keyed by the source path.
     static func outputURL(projectDirectory: URL?, sourcePath: String) -> URL? {
-        let name = "clean-audio-v\(version).m4a"
+        // Keyed to the source's path, size and date, so a replaced source
+        // never reuses audio cleaned from the old file.
+        let attributes = try? FileManager.default.attributesOfItem(atPath: sourcePath)
+        let size = (attributes?[.size] as? NSNumber)?.int64Value ?? 0
+        let date = Int64(((attributes?[.modificationDate] as? Date)?.timeIntervalSince1970 ?? 0).rounded())
+        var hash: UInt64 = 5381
+        for byte in "\(sourcePath)|\(size)|\(date)".utf8 { hash = (hash &* 33) &+ UInt64(byte) }
+        let name = "clean-audio-v\(version)-" + String(hash, radix: 16) + ".m4a"
         if let projectDirectory { return projectDirectory.appendingPathComponent(name) }
         guard let caches = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first else { return nil }
-        var hash: UInt64 = 5381
-        for byte in sourcePath.utf8 { hash = (hash &* 33) &+ UInt64(byte) }
-        return caches.appendingPathComponent("CleanAudio", isDirectory: true)
-            .appendingPathComponent(String(hash, radix: 16) + "-" + name)
+        return caches.appendingPathComponent("CleanAudio", isDirectory: true).appendingPathComponent(name)
     }
 
     /// Renders the cleaned first audio track of `asset` to `url` off the main

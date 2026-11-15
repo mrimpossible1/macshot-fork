@@ -64,7 +64,7 @@ final class AudioCleanupTests: XCTestCase {
 
     func testOutputLivesBesideTheProject() {
         let dir = URL(fileURLWithPath: "/tmp/take-1")
-        XCTAssertEqual(AudioCleanup.outputURL(projectDirectory: dir, sourcePath: "/x.mp4")?.deletingLastPathComponent(), dir)
+        XCTAssertEqual(AudioCleanup.outputURL(projectDirectory: dir, sourcePath: "/x.mp4")?.deletingLastPathComponent().path, dir.path)
         let a = AudioCleanup.outputURL(projectDirectory: nil, sourcePath: "/a.mp4")
         XCTAssertNotNil(a)
         XCTAssertNotEqual(a, AudioCleanup.outputURL(projectDirectory: nil, sourcePath: "/b.mp4"))

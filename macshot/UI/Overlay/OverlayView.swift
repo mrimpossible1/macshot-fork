@@ -5187,7 +5187,10 @@ class OverlayView: NSView {
         get { UserDefaults.standard.bool(forKey: Self.markupToolbarExpandedKey) }
         set { UserDefaults.standard.set(newValue, forKey: Self.markupToolbarExpandedKey) }
     }
-    private var showsSimpleToolbar: Bool { usesSimpleToolbar && !markupToolbarExpanded }
+    /// Expanded because a hidden tool was picked by its key: this session only.
+    private var markupToolbarExpandedThisSession = false
+    private var isMarkupToolbarExpanded: Bool { markupToolbarExpanded || markupToolbarExpandedThisSession }
+    private var showsSimpleToolbar: Bool { usesSimpleToolbar && !isMarkupToolbarExpanded }
     private var simpleToolChosenThisSession = false
 
     /// Rebuild toolbar button content. Call when tool, color, or state changes — NOT on every draw.
@@ -5195,8 +5198,8 @@ class OverlayView: NSView {
         if showsSimpleToolbar, !Self.simpleMarkupTools.contains(currentTool),
            !Self.simpleCompatibleTools.contains(currentTool) {
             if simpleToolChosenThisSession {
-                // A hidden tool was picked by its key: show the full bar.
-                markupToolbarExpanded = true
+                // A hidden tool was picked by its key: show the full bar for now.
+                markupToolbarExpandedThisSession = true
             } else {
                 currentTool = .arrow
             }
@@ -5232,7 +5235,7 @@ class OverlayView: NSView {
             rightButtons = ToolbarLayout.simpleRightButtons(from: rightButtons)
         }
         if usesSimpleToolbar {
-            bottomButtons.append(ToolbarLayout.moreToolsButton(expanded: markupToolbarExpanded))
+            bottomButtons.append(ToolbarLayout.moreToolsButton(expanded: isMarkupToolbarExpanded))
         }
 
         // Create strip views if needed — add to chrome parent (window content) when in scroll view
@@ -8495,7 +8498,9 @@ class OverlayView: NSView {
             let gearBtn = rightStripView?.buttonViews.first { if case .recordSettings = $0.action { return true }; return false }
             showRecordingSettingsPopover(anchorView: gearBtn)
         case .moreTools:
-            markupToolbarExpanded.toggle()
+            let expanded = isMarkupToolbarExpanded
+            markupToolbarExpanded = !expanded
+            markupToolbarExpandedThisSession = false
         }
 
         // Rebuild toolbars to reflect new state (selected tool, color, etc.)
@@ -10448,6 +10453,7 @@ class OverlayView: NSView {
         autoConfirmMode = false
         simpleMarkupMode = false
         simpleToolChosenThisSession = false
+        markupToolbarExpandedThisSession = false
         isRecognizingText = false
         pendingDoubleClickCopy = nil
         lastMouseUpAt = -.infinity

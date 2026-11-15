@@ -677,6 +677,7 @@ final class VideoEditorWindowController: NSWindowController, NSWindowDelegate {
                     return
                 }
                 self.editorDocument.edit([.render, .segments]) { $0.captions = captions; $0.look.captions.show = true }
+                self.inspector.rebuild()
                 self.showStatus(String(format: L("Added %d captions"), captions.count))
             } catch {
                 guard !(error is CancellationError) else { return }
@@ -710,6 +711,7 @@ final class VideoEditorWindowController: NSWindowController, NSWindowDelegate {
                         VideoCutSegment(startTime: $0.0, endTime: $0.1, isAutomatic: true)
                     })
                 }
+                self.inspector.rebuild()
                 let seconds = Int(PauseTrimmer.totalDuration(ranges).rounded())
                 self.showStatus(ranges.isEmpty ? L("No pauses to remove")
                                                : String(format: L("Removed %d pauses (%d s shorter)"), ranges.count, seconds))
@@ -755,7 +757,14 @@ final class VideoEditorWindowController: NSWindowController, NSWindowDelegate {
             } catch {
                 guard !(error is CancellationError) else { return }
                 self?.editorDocument.edit([.render, .timing]) { $0.cleanAudio = false }
-                self?.showStatus(error.localizedDescription, isError: true)
+                let message: String
+                switch error as? AudioCleanup.CleanupError {
+                case .noAudio?: message = L("This recording has no audio to clean up.")
+                case .readFailed?: message = L("Couldn't read the recording's audio.")
+                case .writeFailed?: message = L("Couldn't save the cleaned-up audio.")
+                case nil: message = error.localizedDescription
+                }
+                self?.showStatus(message, isError: true)
             }
         }
     }

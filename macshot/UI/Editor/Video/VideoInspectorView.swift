@@ -150,7 +150,7 @@ final class VideoInspectorView: NSView {
         if document.selection != nil { document.select(nil) } else { rebuild() }
     }
 
-    private func rebuild() {
+    func rebuild() {
         refreshers.removeAll()
         for view in content.arrangedSubviews { content.removeArrangedSubview(view); view.removeFromSuperview() }
         let selection = document.selection

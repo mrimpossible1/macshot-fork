@@ -938,3 +938,5 @@
 "Audio cleaned up" = "Audio cleaned up";
 "This recording has no audio to clean up." = "This recording has no audio to clean up.";
 "Transcription happens on this Mac. Nothing is uploaded." = "Transcription happens on this Mac. Nothing is uploaded.";
+"Couldn't read the recording's audio." = "Couldn't read the recording's audio.";
+"Couldn't save the cleaned-up audio." = "Couldn't save the cleaned-up audio.";

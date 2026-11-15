@@ -512,7 +512,7 @@ final class VideoProject: Codable {
 
     /// Whether the project changes the output relative to the source file.
     var hasEdits: Bool {
-        trimStart > 0.01 || sourceDuration - trimEnd > 0.01 || muted
+        trimStart > 0.01 || sourceDuration - trimEnd > 0.01 || muted || cleanAudio
             || crop != CGRect(x: 0, y: 0, width: 1, height: 1)
             || look.frame.drawsBackground
             || !zooms.isEmpty || !censors.isEmpty || !texts.isEmpty || !cuts.isEmpty
