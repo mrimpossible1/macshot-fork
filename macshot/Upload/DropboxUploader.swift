@@ -352,7 +352,11 @@ final class DropboxUploader: NSObject, ASWebAuthenticationPresentationContextPro
                         linkError = error
                     }
                 }
-                try? await deleteTestFile(storedPath, generation: generation)
+                do {
+                    try await deleteTestFile(storedPath, generation: generation)
+                } catch {
+                    message += " " + String(format: L("Couldn't remove the test file at %@."), storedPath)
+                }
                 if let linkError {
                     completion(.failure(Self.error(L("Uploading works, but making a link failed:") + " "
                                                    + linkError.localizedDescription)))
@@ -666,7 +670,18 @@ final class DropboxUploader: NSObject, ASWebAuthenticationPresentationContextPro
         return appSupport.appendingPathComponent("com.sw33tlie.macshot").appendingPathComponent("dropbox_tokens.json")
     }
 
+    /// Decoded tokens, so a request doesn't read the Keychain several times
+    /// (each read can prompt if the app's signature changed).
+    private var cachedTokens: TokenData?
+
     private func loadTokens() -> TokenData {
+        if let cachedTokens { return cachedTokens }
+        let tokens = readStoredTokens()
+        if tokens.refreshToken != nil || tokens.accessToken != nil { cachedTokens = tokens }
+        return tokens
+    }
+
+    private func readStoredTokens() -> TokenData {
         if let tokenFileOverride {
             guard let data = try? Data(contentsOf: tokenFileOverride),
                   let tokens = try? JSONDecoder().decode(TokenData.self, from: data) else { return TokenData() }
@@ -687,17 +702,21 @@ final class DropboxUploader: NSObject, ASWebAuthenticationPresentationContextPro
 
     private func saveToken(accessToken: String, refreshToken: String, expiry: Double) {
         let tokens = TokenData(accessToken: accessToken, refreshToken: refreshToken, expiry: expiry)
+        cachedTokens = tokens
         guard let data = try? JSONEncoder().encode(tokens) else { return }
         if let tokenFileOverride {
             try? data.write(to: tokenFileOverride, options: .atomic)
             return
         }
-        // A refused Keychain write leaves no token: the next upload asks to connect again.
-        KeychainStore.write(data, service: Self.keychainService, account: Self.keychainAccount)
-        if let legacy = legacyTokenFileURL { try? FileManager.default.removeItem(at: legacy) }
+        // Only drop the old file once the Keychain really has the tokens.
+        if KeychainStore.write(data, service: Self.keychainService, account: Self.keychainAccount),
+           let legacy = legacyTokenFileURL {
+            try? FileManager.default.removeItem(at: legacy)
+        }
     }
 
     private func deleteTokens() {
+        cachedTokens = nil
         if let tokenFileOverride {
             try? FileManager.default.removeItem(at: tokenFileOverride)
             return

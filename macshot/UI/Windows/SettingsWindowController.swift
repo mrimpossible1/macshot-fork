@@ -1994,6 +1994,12 @@ class SettingsWindowController: NSWindowController, NSToolbarDelegate, NSWindowD
         stack.addArrangedSubview(indented(redactCheckbox))
         stack.setCustomSpacing(6, after: stack.arrangedSubviews.last!)
 
+        let previewCheckbox = NSButton(checkboxWithTitle: L("Preview each upload (shows the covered items and the file name)"),
+                                       target: self, action: #selector(uploadPreviewChanged(_:)))
+        previewCheckbox.state = AppDelegate.uploadPreviewEnabled ? .on : .off
+        stack.addArrangedSubview(indented(previewCheckbox))
+        stack.setCustomSpacing(6, after: stack.arrangedSubviews.last!)
+
         let namesCheckbox = NSButton(checkboxWithTitle: L("Name Dropbox files from their text"), target: self, action: #selector(uploadReadableNamesChanged(_:)))
         namesCheckbox.state = UploadPreparation.readableNames ? .on : .off
         stack.addArrangedSubview(indented(namesCheckbox))
@@ -2069,11 +2075,6 @@ class SettingsWindowController: NSWindowController, NSToolbarDelegate, NSWindowD
         dropboxDirectCheckbox = NSButton(checkboxWithTitle: L("Direct links (open the file itself, not the Dropbox page)"), target: self, action: #selector(dropboxDirectChanged(_:)))
         dropboxDirectCheckbox.state = UserDefaults.standard.bool(forKey: "dropboxDirectLinks") ? .on : .off
         stack.addArrangedSubview(indented(dropboxDirectCheckbox))
-
-        let previewCheckbox = NSButton(checkboxWithTitle: L("Preview each upload (shows the covered items and the file name)"),
-                                       target: self, action: #selector(uploadPreviewChanged(_:)))
-        previewCheckbox.state = AppDelegate.uploadPreviewEnabled ? .on : .off
-        stack.addArrangedSubview(indented(previewCheckbox))
 
         let archiveCheckbox = NSButton(checkboxWithTitle: L("Each month, move last month's files into Archive/YYYY-MM"), target: self, action: #selector(dropboxArchiveChanged(_:)))
         archiveCheckbox.state = DropboxUploader.shared.monthlyArchive ? .on : .off
@@ -2532,7 +2533,7 @@ class SettingsWindowController: NSWindowController, NSToolbarDelegate, NSWindowD
             guard let self else { return }
             if success { self.window?.makeKeyAndOrderFront(nil) }
             self.updateDropboxStatus()
-            if !success {
+            if !success, !DropboxUploader.shared.isSignedIn {
                 self.showDropboxMessage(L("Couldn't connect to Dropbox"),
                     L("The sign-in was cancelled or Dropbox didn't send MacShotty back a sign-in. Try Connect Dropbox again and click Allow on the Dropbox page."),
                     isError: true)

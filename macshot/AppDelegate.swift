@@ -2271,7 +2271,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
         toast.onDismiss = { [weak self] in
             self?.uploadToastController = nil
         }
-        toast.show(status: "Uploading...")
+        toast.show(status: L("Preparing..."))
 
         let provider = UserDefaults.standard.string(forKey: "uploadProvider") ?? "dropbox"
 
@@ -2301,9 +2301,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
             let decision = self?.confirmUploadPreview(prepared, provider: provider) ?? (upload: true, title: prepared.title)
             guard decision.upload else {
                 toast.dismiss()
-                self?.returnFocusIfNeeded()
                 return
             }
+            toast.setStatus(L("Uploading..."))
             let image = prepared.image
             if provider == "dropbox" {
                 let hidden = prepared.redactedCount
@@ -3742,6 +3742,7 @@ extension AppDelegate: NSMenuDelegate {
 
 // MARK: - Upload preview (MacShotty)
 
+#if !OFFLINE
 extension AppDelegate {
     static let uploadPreviewKey = "uploadPreview"
     static var uploadPreviewEnabled: Bool { UserDefaults.standard.object(forKey: uploadPreviewKey) as? Bool ?? true }
@@ -3793,6 +3794,8 @@ extension AppDelegate {
         alert.suppressionButton?.title = L("Don't show this preview again")
         NSApp.activate(ignoringOtherApps: true)
         let response = alert.runModal()
+        // Give the keyboard back to the app the user was in, whichever button.
+        returnFocusIfNeeded()
         if alert.suppressionButton?.state == .on {
             UserDefaults.standard.set(false, forKey: Self.uploadPreviewKey)
         }
@@ -3836,6 +3839,7 @@ extension AppDelegate {
         return formatter.string(from: date)
     }
 }
+#endif
 
 // MARK: - Before / After
 

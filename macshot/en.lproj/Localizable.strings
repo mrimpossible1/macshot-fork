@@ -965,3 +965,6 @@
 "expires %@" = "expires %@";
 "%d hidden" = "%d hidden";
 "Preview each upload (shows the covered items and the file name)" = "Preview each upload (shows the covered items and the file name)";
+"Preparing..." = "Preparing...";
+"Uploading..." = "Uploading...";
+"Couldn't remove the test file at %@." = "Couldn't remove the test file at %@.";

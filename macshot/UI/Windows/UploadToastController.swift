@@ -86,6 +86,11 @@ class UploadToastController {
         }
     }
 
+    /// MacShotty: change the in-progress line (e.g. Preparing… → Uploading…).
+    func setStatus(_ text: String) {
+        statusLabel?.stringValue = text
+    }
+
     func updateProgress(_ fraction: Double) {
         statusLabel?.stringValue = String(format: L("Uploading... %d%%"), Int(fraction * 100))
     }

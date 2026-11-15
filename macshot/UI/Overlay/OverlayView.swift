@@ -9328,7 +9328,8 @@ class OverlayView: NSView {
     /// Upload the selection, asking first when "Confirm before uploading" is on.
     /// Used by the toolbar Upload button and by Return when "Enter uploads" is on.
     func requestUploadWithConfirmation() {
-        let confirmEnabled = UserDefaults.standard.bool(forKey: "uploadConfirmEnabled")
+        // The upload preview already asks; don't ask twice.
+        let confirmEnabled = UserDefaults.standard.bool(forKey: "uploadConfirmEnabled") && !AppDelegate.uploadPreviewEnabled
         if confirmEnabled {
             let provider = UserDefaults.standard.string(forKey: "uploadProvider") ?? "dropbox"
             let title: String
