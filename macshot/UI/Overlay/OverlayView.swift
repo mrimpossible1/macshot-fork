@@ -9330,7 +9330,7 @@ class OverlayView: NSView {
     func requestUploadWithConfirmation() {
         let confirmEnabled = UserDefaults.standard.bool(forKey: "uploadConfirmEnabled")
         if confirmEnabled {
-            let provider = UserDefaults.standard.string(forKey: "uploadProvider") ?? "imgbb"
+            let provider = UserDefaults.standard.string(forKey: "uploadProvider") ?? "dropbox"
             let title: String
             switch provider {
             case "gdrive": title = L("Upload to Google Drive?")

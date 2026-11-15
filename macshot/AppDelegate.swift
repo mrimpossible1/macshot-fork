@@ -2273,7 +2273,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, SPUUpdaterDelegate {
         }
         toast.show(status: "Uploading...")
 
-        let provider = UserDefaults.standard.string(forKey: "uploadProvider") ?? "imgbb"
+        let provider = UserDefaults.standard.string(forKey: "uploadProvider") ?? "dropbox"
 
         if provider == "gdrive" && !GoogleDriveUploader.shared.isSignedIn {
             toast.showError(message: "Google Drive not signed in")

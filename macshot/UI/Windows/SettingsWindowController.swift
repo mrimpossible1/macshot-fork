@@ -1972,7 +1972,7 @@ class SettingsWindowController: NSWindowController, NSToolbarDelegate, NSWindowD
 
         providerPopup = NSPopUpButton()
         providerPopup.addItems(withTitles: [L("imgbb (images only)"), L("Google Drive (images + videos)"), L("S3-Compatible (images + videos)"), L("Dropbox (images + videos)")])
-        let currentProvider = UserDefaults.standard.string(forKey: "uploadProvider") ?? "imgbb"
+        let currentProvider = UserDefaults.standard.string(forKey: "uploadProvider") ?? "dropbox"
         switch currentProvider {
         case "gdrive": providerPopup.selectItem(at: 1)
         case "s3": providerPopup.selectItem(at: 2)
@@ -2032,7 +2032,12 @@ class SettingsWindowController: NSWindowController, NSToolbarDelegate, NSWindowD
         dropboxSignInBtn.bezelStyle = .rounded
         updateDropboxStatus()
         stack.addArrangedSubview(labeledRow(L("Account:"), controls: [dropboxStatusLabel]))
-        stack.addArrangedSubview(indented(dropboxSignInBtn))
+        let dropboxTestBtn = NSButton(title: L("Test Dropbox"), target: self, action: #selector(dropboxTestTapped(_:)))
+        dropboxTestBtn.bezelStyle = .rounded
+        let dropboxButtons = NSStackView(views: [dropboxSignInBtn, dropboxTestBtn])
+        dropboxButtons.orientation = .horizontal
+        dropboxButtons.spacing = 8
+        stack.addArrangedSubview(indented(dropboxButtons))
         stack.setCustomSpacing(10, after: stack.arrangedSubviews.last!)
 
         dropboxFolderField = NSTextField()
@@ -2518,10 +2523,40 @@ class SettingsWindowController: NSWindowController, NSToolbarDelegate, NSWindowD
             guard let self else { return }
             if success { self.window?.makeKeyAndOrderFront(nil) }
             self.updateDropboxStatus()
+            if !success {
+                self.showDropboxMessage(L("Couldn't connect to Dropbox"),
+                    L("The sign-in was cancelled or Dropbox didn't send MacShotty back a sign-in. Try Connect Dropbox again and click Allow on the Dropbox page."),
+                    isError: true)
+            }
             if success {
                 DropboxUploader.shared.fetchAccountName { [weak self] in self?.updateDropboxStatus() }
             }
         }
+    }
+
+    @objc private func dropboxTestTapped(_ sender: NSButton) {
+        sender.isEnabled = false
+        let previous = sender.title
+        sender.title = L("Testing…")
+        DropboxUploader.shared.testConnection { [weak self, weak sender] result in
+            sender?.isEnabled = true
+            sender?.title = previous
+            switch result {
+            case .success(let message):
+                self?.showDropboxMessage(L("Dropbox is working"), message, isError: false)
+            case .failure(let error):
+                self?.showDropboxMessage(L("Dropbox test failed"), error.localizedDescription, isError: true)
+            }
+            self?.updateDropboxStatus()
+        }
+    }
+
+    private func showDropboxMessage(_ title: String, _ text: String, isError: Bool) {
+        let alert = NSAlert()
+        alert.messageText = title
+        alert.informativeText = text
+        alert.alertStyle = isError ? .warning : .informational
+        if let window { alert.beginSheetModal(for: window) } else { alert.runModal() }
     }
 
     @objc private func gdriveSignInTapped(_ sender: NSButton) {

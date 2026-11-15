@@ -321,6 +321,58 @@ final class DropboxUploader: NSObject, ASWebAuthenticationPresentationContextPro
         }, completion: completion)
     }
 
+    /// MacShotty "Test Dropbox": uploads a tiny text file to the share
+    /// folder, makes a link the same way real uploads do (so a plan that
+    /// can't make expiring links shows up here), then deletes the file.
+    func testConnection(completion: @escaping (Result<String, Error>) -> Void) {
+        guard isSignedIn else {
+            completion(.failure(Self.error(L("Not connected to Dropbox. Click Connect Dropbox first."))))
+            return
+        }
+        let generation = authGeneration
+        let path = Self.destinationPath(folder: folderPath, filename: "MacShotty connection test.txt")
+        let audience = linkAudience
+        Task { [weak self] in
+            guard let self else { return }
+            do {
+                let body = try await MediaExportIO.perform {
+                    try PreparedUploadBody(payload: .data(Data("MacShotty connection test. Safe to delete.".utf8)))
+                }
+                _ = try await validToken()
+                let stored = try await uploadSingle(body: body, path: path, generation: generation, progress: nil)
+                let storedPath = stored["path_display"] as? String ?? path
+                var message = String(format: L("Uploaded to %@."), (storedPath as NSString).deletingLastPathComponent)
+                var linkError: Error?
+                if audience != .none {
+                    do {
+                        _ = try await sharedLink(for: stored["id"] as? String ?? storedPath, audience: audience,
+                                                 generation: generation)
+                        message += " " + L("Links work too.")
+                    } catch {
+                        linkError = error
+                    }
+                }
+                try? await deleteTestFile(storedPath, generation: generation)
+                if let linkError {
+                    completion(.failure(Self.error(L("Uploading works, but making a link failed:") + " "
+                                                   + linkError.localizedDescription)))
+                } else {
+                    completion(.success(message))
+                }
+            } catch {
+                completion(.failure(error))
+            }
+        }
+    }
+
+    private func deleteTestFile(_ path: String, generation: UUID) async throws {
+        try checkAccount(generation)
+        let request = try await apiRequest("/files/delete_v2", body: ["path": path])
+        let (data, raw) = try await session.data(for: request)
+        guard let response = raw as? HTTPURLResponse else { throw URLError(.badServerResponse) }
+        _ = try Self.parseResponse(data, response: response)
+    }
+
     /// `title` is a readable name from the screenshot's text (see
     /// `UploadPreparation`); without one the filename template is used.
     func uploadImage(_ image: NSImage, title: String? = nil, progress: (@MainActor @Sendable (Double) -> Void)? = nil,

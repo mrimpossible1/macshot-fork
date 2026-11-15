@@ -250,7 +250,7 @@ extension VideoEditorWindowController {
     @objc func uploadAction() {
         PopoverHelper.dismiss()
         guard !isExporting else { return }
-        let provider = UserDefaults.standard.string(forKey: "uploadProvider") ?? "imgbb"
+        let provider = UserDefaults.standard.string(forKey: "uploadProvider") ?? "dropbox"
         if provider == "gdrive" && !GoogleDriveUploader.shared.isSignedIn {
             showStatus(L("Sign in to Google Drive in Settings"), isError: true); return
         }

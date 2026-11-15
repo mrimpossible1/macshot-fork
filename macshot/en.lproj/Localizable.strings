@@ -940,3 +940,13 @@
 "Transcription happens on this Mac. Nothing is uploaded." = "Transcription happens on this Mac. Nothing is uploaded.";
 "Couldn't read the recording's audio." = "Couldn't read the recording's audio.";
 "Couldn't save the cleaned-up audio." = "Couldn't save the cleaned-up audio.";
+"Not connected to Dropbox. Click Connect Dropbox first." = "Not connected to Dropbox. Click Connect Dropbox first.";
+"Uploaded to %@." = "Uploaded to %@.";
+"Links work too." = "Links work too.";
+"Uploading works, but making a link failed:" = "Uploading works, but making a link failed:";
+"Test Dropbox" = "Test Dropbox";
+"Testing…" = "Testing…";
+"Dropbox is working" = "Dropbox is working";
+"Dropbox test failed" = "Dropbox test failed";
+"Couldn't connect to Dropbox" = "Couldn't connect to Dropbox";
+"The sign-in was cancelled or Dropbox didn't send MacShotty back a sign-in. Try Connect Dropbox again and click Allow on the Dropbox page." = "The sign-in was cancelled or Dropbox didn't send MacShotty back a sign-in. Try Connect Dropbox again and click Allow on the Dropbox page.";
